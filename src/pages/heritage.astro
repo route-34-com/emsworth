@@ -1,0 +1,102 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Gallery from '../components/Gallery.astro';
+import { certifications, process } from '../data/catalogue';
+import { pick, inFolder } from '../data/shoot';
+
+const outdoor = inFolder('outdoor', true).map((p) => p.src);
+const banners = inFolder('web-banner').map((p) => p.src);
+const facilities = [
+  ['Weaving', 'High-speed warping, Itema looms and Stäubli jacquard, producing around 180 tonnes a month.'],
+  ['Dyeing', 'A modern soft-flow dyeing unit, with our own share in a state-sponsored common effluent treatment plant for zero liquid discharge.'],
+  ['Finishing', 'Mario Crosta finishing machinery and Schmale length hemming.'],
+  ['Making up', 'A high-tech sewing unit with imported machines, and a dedicated garment unit for robes.'],
+];
+const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced residences', 'Restaurants & F&B', 'Pool & leisure', 'Corporate & institutional'];
+---
+<Base title="Heritage · Emsworth Hospitality" overHero
+  description="Emsworth Hospitality in Dubai, backed by the Christy textile group's mills in Tiruchengode, Tamil Nadu: facilities, certifications and how a project runs.">
+  <PageHero image={pick('outdoor/s1', 'j8a1042-edit')} alt="Guest holding up an ivory Emsworth bath sheet in dappled sunlight" focus="55% 40%"
+    kicker="Heritage" title="From loom<br/><em>to linen room.</em>"
+    intro="A Dubai partner for hotel procurement, backed by a textile group that has woven terry, linen and made-ups in Tamil Nadu since 2004." />
+
+  <section class="sec">
+    <div class="wrap two">
+      <div class="reveal">
+        <span class="orn"></span>
+        <span class="label">Two companies, one partner</span>
+        <h2>Regional service.<br/><em>Manufacturing depth.</em></h2>
+      </div>
+      <div class="reveal copy">
+        <p class="lead"><b>Emsworth Hospitality LLC FZ</b> is based in Dubai and serves hotel groups, resorts, developers, consultants and operators across the UAE, GCC, Middle East and Africa.</p>
+        <p>Manufacturing sits with <b>Christy Textile Products Pvt. Ltd.</b>, a Star Export House in Tiruchengode, Tamil Nadu, led by Managing Director N. Mohanasundaram, a textile technologist with more than forty years in the industry. Christy supplies retailers, hotels and institutional buyers across the Middle East, Europe, the UK, the US, Latin America, Japan, Australia and Asia Pacific.</p>
+        <p>That structure lets a procurement team work with a UAE-based partner while reaching established manufacturing, from specification and sampling to production, logistics and delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head reveal"><span class="label">Facilities</span><h2>Under one roof, <em>under our control</em></h2></div>
+      <div class="fac">
+        {facilities.map(([t, d], i) => <div class="frame reveal"><span class="fac__n">{String(i + 1).padStart(2, '0')}</span><h3>{t}</h3><p>{d}</p></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--dark on-dark">
+    <div class="wrap">
+      <div class="sec__head reveal"><span class="label">Certified, audited, tested</span><h2>Before you ask <em>for them.</em></h2></div>
+      <ul class="certs">{certifications.map(([n, d]) => <li class="reveal"><b>{n}</b><span>{d}</span></li>)}</ul>
+      <p class="tests reveal">Testing by Intertek and SGS: absorbency (AATCC 79), colour fastness (ISO 105), dimensional stability after five washes (ISO 6330), tensile and tear (ISO 13934 / 13937). Fire retardancy (BS 7175, NFPA 701) on request.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec__head reveal"><span class="label">How a project runs</span><h2>Six steps, <em>one point of contact</em></h2></div>
+      <ol class="steps">{process.map(([t, d], i) => <li class="reveal"><span>{String(i + 1).padStart(2, '0')}</span><b>{t}</b><p>{d}</p></li>)}</ol>
+      <div class="mk reveal">
+        <span class="label">Who we serve</span>
+        <ul>{markets.map((m) => <li>{m}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head reveal"><span class="label">On location · {outdoor.length} photos</span><h2>Emsworth <em>in the sun</em></h2></div>
+      <Gallery items={outdoor} cap="On location" cols={4} />
+      <div class="sec__head reveal camp"><span class="label">Campaign · {banners.length} photos</span><h2>The collection, <em>in colour</em></h2></div>
+      <Gallery items={banners} cap="Campaign" cols={3} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .two { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 6vw, 90px); }
+  .two h2 { font-size: clamp(38px, 4.6vw, 64px); margin-top: 12px; }
+  .copy p { margin: 0 0 16px; }
+  .copy b { color: var(--primary); }
+  .fac { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .fac__n { font: 400 40px/1 var(--fd); color: var(--accent); }
+  .fac h3 { font-size: 28px; margin: 12px 0 8px; }
+  .fac p { margin: 0; font-size: 15px; color: var(--soft); }
+  .certs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .certs li { border-top: 2px solid var(--accent); padding-top: 16px; display: grid; gap: 6px; }
+  .certs b { font: 400 26px var(--fd); color: var(--ground); }
+  .tests { margin: 40px 0 0; max-width: 80ch; font-size: 15px; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; }
+  .steps li { border-top: 2px solid var(--accent); padding-top: 16px; }
+  .steps span { font: 400 30px var(--fd); color: var(--accent); }
+  .steps b { display: block; font: 400 22px var(--fd); color: var(--primary); margin: 6px 0; }
+  .steps p { margin: 0; font-size: 14px; color: var(--soft); }
+  .mk { margin-top: 70px; display: grid; gap: 16px; }
+  .mk ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .mk li { font: 400 20px var(--fd); color: var(--primary); padding: 10px 18px; border: 1px solid var(--line); }
+  .camp { margin-top: 70px; }
+  @media (max-width: 1020px) { .fac, .certs { grid-template-columns: repeat(2, 1fr); } .steps { grid-template-columns: repeat(3, 1fr); row-gap: 30px; } }
+  @media (max-width: 700px) { .two, .fac, .certs { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } }
+</style>

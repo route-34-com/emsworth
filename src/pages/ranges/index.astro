@@ -1,0 +1,40 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import { ranges } from '../../data/catalogue';
+import { pick, inFolder } from '../../data/shoot';
+---
+<Base title="The Ranges · Emsworth Hospitality" overHero
+  description="Six photographed ranges, from hotel-white Bath Signature to Bamboo Safari jacquards and Cabana pool stripes.">
+  <PageHero image={pick('web-banner', 'j8a0845-edit')} alt="Model in a white robe among hanging Emsworth jacquard towels" focus="60% 35%"
+    kicker="The ranges" title="Six ranges,<br/><em>photographed in full.</em>"
+    intro="Each range page carries every photograph from the shoot. Colours can be dyed to your Pantone and finished with your crest." />
+
+  <section class="sec">
+    <div class="wrap grid">
+      {ranges.map((r) => (
+        <a class="card reveal" href={`/ranges/${r.slug}/`}>
+          <div class="card__img inset"><Image src={r.lead} alt={`${r.name}: ${r.colours}`} widths={[420, 760]} sizes="(max-width: 700px) 92vw, 33vw" /></div>
+          <span class="label">{r.tag} · {inFolder(r.folder, true).length} photos</span>
+          <h2>{r.name}</h2>
+          <p>{r.line}</p>
+          <p class="card__c">{r.colours}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(22px, 3vw, 44px) clamp(18px, 2.4vw, 34px); }
+  .card { text-decoration: none; display: grid; gap: 8px; align-content: start; }
+  .card__img { overflow: hidden; margin-bottom: 10px; }
+  .card__img img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
+  .card:hover .card__img img { transform: scale(1.04); }
+  .card h2 { font-size: clamp(30px, 3vw, 42px); }
+  .card p { margin: 0; color: var(--soft); }
+  .card__c { font: var(--flst) 14px var(--fl); color: var(--lab) !important; }
+  @media (max-width: 960px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>

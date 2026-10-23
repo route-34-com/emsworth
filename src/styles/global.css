@@ -1,0 +1,120 @@
+@import '@fontsource/libre-caslon-display/400.css';
+@import '@fontsource/libre-caslon-text/400.css';
+@import '@fontsource/libre-caslon-text/400-italic.css';
+@import '@fontsource/libre-caslon-text/700.css';
+@import '@fontsource-variable/nunito-sans/index.css';
+@import '@fontsource/gloock/400.css';
+@import '@fontsource/bentham/400.css';
+
+/* ---------- Palettes (data-palette on <html>) ---------- */
+:root, [data-palette='navy'] {
+  --dark: #0b1530; --primary: #1b2a4a; --accent: #b8975a; --ground: #faf7f0; --tint: #e9e4d8; --ink: #1f2633; --lab: #7a5f2c;
+}
+[data-palette='claret'] {
+  --dark: #2a0c12; --primary: #5c1a26; --accent: #b39260; --ground: #f8f2e8; --tint: #ecdfcc; --ink: #2e2522; --lab: #6e4e22;
+}
+[data-palette='navybeige'] {
+  --dark: #141c30; --primary: #1f2a44; --accent: #c6a75e; --ground: #f6efe4; --tint: #e8dcc8; --ink: #1f2a44; --lab: #86692c;
+}
+
+/* ---------- Typefaces (data-type) ---------- */
+:root, [data-type='caslon'] {
+  --fd: 'Libre Caslon Display', 'Libre Caslon Text', Georgia, serif; --fdw: 400;
+  --fl: 'Libre Caslon Text', Georgia, serif; --flst: italic; --flw: 400; --flsp: .2em;
+}
+[data-type='bentham'] {
+  --fd: 'Bentham', Georgia, serif; --fdw: 400;
+  --fl: 'Nunito Sans Variable', system-ui, sans-serif; --flst: normal; --flw: 700; --flsp: .2em;
+}
+[data-type='gloock'] {
+  --fd: 'Gloock', Georgia, serif; --fdw: 400;
+  --fl: 'Libre Caslon Text', Georgia, serif; --flst: italic; --flw: 400; --flsp: .2em;
+}
+:root { --fb: 'Nunito Sans Variable', system-ui, sans-serif; }
+
+/* ---------- Derived tokens ---------- */
+:root {
+  --paper: color-mix(in srgb, var(--ground) 62%, var(--tint));
+  --line: color-mix(in srgb, var(--accent) 55%, transparent);
+  --soft: color-mix(in srgb, var(--ink) 72%, var(--ground));
+  --on-dark: color-mix(in srgb, var(--ground) 88%, transparent);
+  --gutter: clamp(16px, 4vw, 56px);
+  --max: 1320px;
+}
+[data-theme='split'] { --paper: var(--ground); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 17px/1.65 var(--fb); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+h1, h2, h3, h4 { font-family: var(--fd); font-weight: var(--fdw); color: var(--primary); line-height: 1.04; margin: 0; letter-spacing: -.005em; }
+h1 em, h2 em, h3 em { font-style: italic; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.label {
+  display: block; margin: 0; font: var(--flst) var(--flw) 12.5px/1.5 var(--fl);
+  letter-spacing: var(--flsp); text-transform: uppercase; color: var(--lab);
+}
+.on-dark .label, .label--light { color: var(--accent); }
+.orn { display: block; color: var(--accent); font: 30px/1 var(--fd); margin-bottom: 14px; }
+.orn::before { content: '❦'; }
+.lead { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.6; color: var(--soft); max-width: 46ch; }
+.rule { height: 0; border: 0; border-top: 4px double var(--line); margin: 0; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px; border: 1px solid var(--accent);
+  font: 700 12px/1 var(--fb); letter-spacing: .18em; text-transform: uppercase; text-decoration: none;
+  background: var(--accent); color: var(--dark); cursor: pointer; transition: background .25s, color .25s;
+}
+.btn:hover { background: color-mix(in srgb, var(--accent) 82%, #fff); }
+.btn--line { background: transparent; color: var(--primary); }
+.btn--line:hover { background: var(--accent); color: var(--dark); }
+.on-dark .btn--line { color: var(--ground); }
+.link {
+  font: 700 12px var(--fb); letter-spacing: .16em; text-transform: uppercase; text-decoration: none;
+  color: var(--lab); border-bottom: 1px solid currentColor; padding-bottom: 2px;
+}
+.on-dark .link { color: var(--accent); }
+
+/* Add to quote */
+.add {
+  font: 700 11px var(--fb); letter-spacing: .14em; text-transform: uppercase; color: var(--primary);
+  background: none; border: 1px solid var(--line); padding: 9px 14px; cursor: pointer; white-space: nowrap;
+}
+.add:hover { border-color: var(--accent); }
+.add.added { background: var(--primary); color: var(--ground); border-color: var(--primary); }
+
+/* Sections */
+.sec { padding: clamp(72px, 10vw, 140px) 0; }
+.sec--dark { background: var(--dark); color: var(--on-dark); }
+.sec--dark h2, .sec--dark h3 { color: var(--ground); }
+.sec--primary { background: var(--primary); color: var(--on-dark); }
+.sec--primary h2, .sec--primary h3 { color: var(--ground); }
+.sec--ground { background: var(--ground); }
+.sec__head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(36px, 5vw, 60px); }
+.sec__head h2 { font-size: clamp(38px, 5vw, 68px); }
+.sec__head--center { text-align: center; margin-left: auto; margin-right: auto; justify-items: center; }
+.sec__head > .link, .sec__head > .btn { justify-self: start; }
+.sec__head--center > .link, .sec__head--center > .btn { justify-self: center; }
+
+/* Heritage framing: double rules and inset hairlines. Split theme keeps cleaner edges. */
+.frame { border: 4px double var(--line); padding: clamp(22px, 3vw, 40px); background: var(--ground); }
+.inset { position: relative; }
+.inset::after { content: ''; position: absolute; inset: 12px; border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); pointer-events: none; }
+[data-theme='split'] .frame { border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); }
+[data-theme='split'] .inset::after, [data-theme='split'] .orn { display: none; }
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

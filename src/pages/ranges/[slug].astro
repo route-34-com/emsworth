@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Program from '../../components/Program.astro';
+import Gallery from '../../components/Gallery.astro';
+import { ranges, bySlug, type Range } from '../../data/catalogue';
+import { inFolder } from '../../data/shoot';
+
+export function getStaticPaths() {
+  return ranges.map((r) => ({ params: { slug: r.slug }, props: { r } }));
+}
+interface Props { r: Range }
+const { r } = Astro.props;
+const main = inFolder(r.folder).map((p) => p.src);
+const hand = inFolder(`${r.folder}/hand`).map((p) => p.src);
+const spec = r.specFrom && bySlug(r.specFrom.collection).programs.find((p) => p.id === r.specFrom!.program);
+const i = ranges.indexOf(r);
+const next = ranges[(i + 1) % ranges.length];
+---
+<Base title={`${r.name} · Emsworth Hospitality`} description={r.line} overHero>
+  <PageHero image={r.lead} alt={`${r.name}: ${r.colours}`} focus="50% 30%" kicker={r.tag} title={r.name} intro={r.line}
+    crumbs={[['Home', '/'], ['Ranges', '/ranges/']]} />
+
+  <section class="sec sec--tight">
+    <div class="wrap about">
+      <div class="reveal">
+        <span class="orn"></span>
+        <span class="label">{r.name}</span>
+        <h2 class="about__h">{r.tag},<br/><em>made for {r.for.split(',')[0].toLowerCase()}.</em></h2>
+        <p class="lead">{r.body}</p>
+        <button class="add" data-add={`range-${r.slug}`} data-name={r.name} data-group="Ranges">+ Add to quote</button>
+      </div>
+      <dl class="frame reveal">
+        <div><dt>Colours shown</dt><dd>{r.colours}</dd></div>
+        <div><dt>Made for</dt><dd>{r.for}</dd></div>
+        <div><dt>Custom colour</dt><dd>Piece dyed to your Pantone from 500 pcs, yarn dyed from 1,000 pcs</dd></div>
+        <div><dt>Branding</dt><dd>Jacquard woven logo, embroidery or woven label</dd></div>
+        {!spec && <div><dt>Specification</dt><dd>Construction, weight and sizes on request with your quote</dd></div>}
+      </dl>
+    </div>
+  </section>
+
+  {spec && (
+    <section class="sec sec--ground spec">
+      <div class="wrap">
+        <div class="sec__head reveal"><span class="label">Specification</span><h2>Built on <em>{spec.name}</em></h2></div>
+        <Program p={spec} group={r.name} n={1} />
+      </div>
+    </section>
+  )}
+
+  <section class:list={['sec', { 'sec--flush': !spec }]}>
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">The full shoot · {main.length + hand.length} photos</span>
+        <h2>{r.name}, <em>every frame</em></h2>
+      </div>
+      <Gallery items={main} cap={r.name} cols={4} />
+      {hand.length > 0 && (
+        <div class="hand">
+          <div class="sec__head reveal"><span class="label">In the hand</span><h3>Held, folded, felt</h3></div>
+          <Gallery items={hand} cap={`${r.name} · in the hand`} cols={4} />
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="sec sec--primary on-dark">
+    <div class="wrap nx">
+      <div><span class="label">Next range</span><h2>{next.name}</h2><p>{next.line}</p></div>
+      <div class="nx__ctas"><a class="btn" href={`/ranges/${next.slug}/`}>View {next.name}</a><a class="btn btn--line" href="/request-a-quote/">Request a quote</a></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sec--tight { padding-bottom: clamp(40px, 5vw, 70px); }
+  .sec--flush { padding-top: clamp(20px, 3vw, 40px); }
+  .about { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(30px, 6vw, 90px); align-items: center; }
+  .about__h { font-size: clamp(36px, 4.2vw, 58px); margin: 12px 0 20px; }
+  .about .lead { margin: 0 0 26px; max-width: 52ch; }
+  dl { margin: 0; display: grid; gap: 0; }
+  dl div { display: grid; grid-template-columns: 38% 1fr; gap: 14px; padding: 13px 0; border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  dl div:last-child { border-bottom: 0; }
+  dt { font: var(--flst) var(--flw) 12px var(--fl); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); padding-top: 2px; }
+  dd { margin: 0; font-size: 15.5px; }
+  .hand { margin-top: 60px; }
+  .hand h3 { font-size: clamp(30px, 3vw, 42px); }
+  .nx { display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: end; }
+  .nx h2 { font-size: clamp(40px, 5vw, 70px); margin: 10px 0; }
+  .nx p { margin: 0; }
+  .nx__ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  @media (max-width: 820px) { .about, .nx { grid-template-columns: 1fr; } }
+</style>

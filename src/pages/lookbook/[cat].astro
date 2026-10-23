@@ -1,0 +1,278 @@
+---
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { COLOURS, CATEGORIES, STYLE_NAMES, STYLE_ORDER, tagged } from '../../data/colours';
+
+// One product from the lookbook, colour by colour and, within a colour, style by style; then "made in your colour".
+export function getStaticPaths() {
+  return CATEGORIES.map((c, i) => ({ params: { cat: c.id }, props: { c, prev: CATEGORIES[(i - 1 + CATEGORIES.length) % CATEGORIES.length], next: CATEGORIES[(i + 1) % CATEGORIES.length] } }));
+}
+type Cat = (typeof CATEGORIES)[number];
+interface Props { c: Cat; prev: Cat; next: Cat }
+const { c, prev, next } = Astro.props;
+const mine = tagged.filter((p) => p.cat === c.id);
+const full = new Map(await Promise.all(mine.map(async (p) => [p, (await getImage({ src: p.src, width: 1600, format: 'webp' })).src] as const)));
+let groups = COLOURS.map((col) => {
+  const photos = mine.filter((p) => p.col === col.id);
+  const styles = STYLE_ORDER.map((st) => ({ id: st, name: STYLE_NAMES[st], photos: photos.filter((p) => p.style === st) })).filter((x) => x.photos.length);
+  return { ...col, n: photos.length, styles };
+}).filter((g) => g.n > 0);
+// One colour in several designs (bath mats, bed linen): each design is its own group.
+if (groups.length === 1 && groups[0].styles.length > 1) {
+  groups = groups[0].styles.map((st) => ({ ...groups[0], id: st.id, name: st.name, hex: '', n: st.photos.length, styles: [st] }));
+}
+// Smaller products run as one continuous flow, each photo labelled with its colour (and style); the big towel range keeps sections.
+const asFlow = mine.length <= 60;
+const label = (g: (typeof groups)[number], st: { name: string }) => (g.styles.length > 1 && g.name !== st.name ? `${g.name} · ${st.name}` : g.name);
+// Under the photo, a colour with several styles shows just the style (the dot gives the colour); the full label stays in the lightbox.
+const short = (g: (typeof groups)[number], st: { name: string }) => (g.styles.length > 1 && g.name !== st.name ? st.name : g.name);
+const flow = groups.flatMap((g) => g.styles.flatMap((st) => st.photos.map((p) => ({ p, g, st }))))
+  .map((x, i, all) => ({ ...x, first: i === 0 || all[i - 1].g.id !== x.g.id }));
+// In sections, a style with only one or two photos joins the gallery before it (each labelled), so no photo sits alone.
+const blocks = (g: (typeof groups)[number]) => g.styles.reduce((out, st) => {
+  if (st.photos.length < 3 && out.length) out.at(-1)!.photos.push(...st.photos.map((p) => ({ p, tag: st.name })));
+  else out.push({ ...st, photos: st.photos.map((p) => ({ p, tag: '' })) });
+  return out;
+}, [] as { id: string; name: string; photos: { p: (typeof mine)[number]; tag: string }[] }[]);
+const total = mine.length;
+const SHOW = 8; // tiles per colour before "show all"
+const chip = (k: { id: string; hex: string; two?: boolean }) =>
+  k.id === 'mixed' ? 'background: conic-gradient(#a6472b 0 17%, #24479b 0 34%, #7ba477 0 50%, #1c1c1c 0 67%, #eee3c9 0 84%, #45444b 0)'
+  : k.two ? `background: linear-gradient(135deg, ${k.hex} 50%, #eee3c9 50%)` : `background: ${k.hex}`;
+
+// Hotel shades offered as a starting point, light to dark by family; the last button opens the full picker.
+const shades: [string, string][] = [
+  ['Ivory', '#e9dcc0'], ['Sand', '#d6c2a0'], ['Camel', '#b98a5e'], ['Stone', '#a59d90'], ['Dove grey', '#b9bcbf'], ['Charcoal', '#3d3c41'],
+  ['Blush', '#e6b8ae'], ['Dusty rose', '#c48b8b'], ['Terracotta', '#a8553a'], ['Saffron', '#d9822b'], ['Mustard', '#c9a227'], ['Claret', '#6d2235'],
+  ['Sage', '#8fa98a'], ['Olive', '#76803a'], ['Bottle green', '#1f4a3c'], ['Teal', '#127b75'], ['Aqua', '#7fbfbf'], ['Dusk blue', '#56708f'],
+  ['Cobalt', '#2c4f9e'], ['Midnight', '#1f2a44'], ['Lavender', '#a99bc9'], ['Aubergine', '#4a2c48'], ['Mocha', '#6b4f3f'], ['Black', '#1b1b1d'],
+];
+---
+<Base title={`${c.name} · Lookbook · Emsworth Hospitality`}
+  description={`${c.name} from the Emsworth shoot, by colour and style: ${total} photographs. Or have them dyed to your own Pantone.`}>
+  <section class="room wrap">
+    <header class="room__head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/lookbook/">Lookbook</a><span>/</span>{c.name}</nav>
+      <h1>{c.name}</h1>
+      <nav class="cols" aria-label="Sections">
+        {groups.map((g) => <a href={`#${g.id}`}>{g.hex && <i style={chip(g)}></i>}{g.name}</a>)}
+        <a href="#own" class="cols__own"><i></i>Your colour</a>
+      </nav>
+    </header>
+
+    {asFlow && (
+      <div class="gal gal--flow" data-gallery data-justify>
+        {flow.map(({ p, g, st, first }) => (
+          <a class="tile" id={first ? g.id : undefined} href={full.get(p)} data-full data-cap={`${c.name} · ${label(g, st)}`} data-ar={(p.src.width / p.src.height).toFixed(4)}>
+            <span class="tile__img" style={`aspect-ratio: ${p.src.width} / ${p.src.height}`}>
+              <Image src={p.src} alt={`${c.one}, ${label(g, st).toLowerCase()}`} widths={[400, 800, 1200]} sizes="(max-width: 640px) 60vw, 34vw" loading="lazy" />
+            </span>
+            <span class="tile__cap" title={label(g, st)}>{g.hex && <i style={chip(g)}></i>}{short(g, st)}</span>
+          </a>
+        ))}
+      </div>
+    )}
+
+    {!asFlow && groups.map((g) => (
+      <section class="grp" id={g.id}>
+        <div class="grp__head">
+          <h2>{g.hex && <i style={chip(g)}></i>}{g.name}</h2>
+          <span>{g.n} {g.n === 1 ? 'photo' : 'photos'}{g.styles.length > 1 && ` · ${g.styles.length} styles`}</span>
+        </div>
+        {blocks(g).map((st) => (
+          <div class="sty" data-grp>
+            {g.styles.length > 1 && <h3 class="sty__h">{st.name}<small>{st.photos.length}</small></h3>}
+            <div class="gal" data-gallery data-justify>
+              {st.photos.map(({ p, tag }, i) => (
+                <a class="tile" href={full.get(p)} data-full data-cap={`${c.name} · ${g.name} · ${tag || st.name}`} data-ar={(p.src.width / p.src.height).toFixed(4)} hidden={i >= SHOW}>
+                  <span class="tile__img" style={`aspect-ratio: ${p.src.width} / ${p.src.height}`}>
+                    <Image src={p.src} alt={`${c.one}, ${(tag || st.name).toLowerCase()} in ${g.name.toLowerCase()}`} widths={[400, 800, 1200]} sizes="(max-width: 640px) 60vw, 34vw" loading="lazy" />
+                  </span>
+                  {tag && <span class="tile__cap">{tag}</span>}
+                </a>
+              ))}
+            </div>
+            {st.photos.length > SHOW && <button class="more" data-more>Show all {st.photos.length}</button>}
+          </div>
+        ))}
+      </section>
+    ))}
+  </section>
+
+  <section class="own" id="own" data-own data-cat={c.id} data-cat-name={c.name}>
+    <div class="own__in wrap">
+      <figure class="own__swatch">
+        <figcaption><span data-own-name>Sage</span><small data-own-hex>#8FA98A</small></figcaption>
+      </figure>
+
+      <div class="own__form">
+        <span class="orn"></span>
+        <span class="label">Made in your colour</span>
+        <h2>Any shade, <em>dyed to your Pantone.</em></h2>
+
+        <div class="shades" role="radiogroup" aria-label="Choose a shade">
+          {shades.map(([n, hex]) => (
+            <button role="radio" aria-checked={n === 'Sage' ? 'true' : 'false'} data-shade={hex} data-name={n} style={`--c:${hex}`} aria-label={n} title={n}></button>
+          ))}
+          <label class="shades__own" title="Any colour">
+            <input type="color" value="#8fa98a" data-own-color aria-label="Any colour" />
+          </label>
+        </div>
+
+        <label class="own__field">
+          <input type="text" placeholder="Pantone reference, e.g. 19-4052 TCX" data-own-pantone autocomplete="off" aria-label="Pantone reference" />
+        </label>
+
+        <ul class="own__terms">
+          <li><b>Piece dyed</b>from 500 pcs · +7 days</li>
+          <li><b>Yarn dyed</b>from 1,000 pcs · +14 days</li>
+          <li><b>Lab dip</b>for your approval first</li>
+        </ul>
+
+        <button class="add" data-add="" data-name="" data-group="Custom colour" data-own-add>+ Add to quote</button>
+      </div>
+    </div>
+  </section>
+
+  <nav class="pn wrap" aria-label="Other products">
+    <a href={`/lookbook/${prev.id}/`}><small>Previous</small>{prev.name}</a>
+    <a href="/lookbook/" class="pn__all">All products</a>
+    <a href={`/lookbook/${next.id}/`}><small>Next</small>{next.name}</a>
+  </nav>
+</Base>
+
+<style>
+  .room { padding-top: clamp(40px, 6vw, 80px); padding-bottom: clamp(60px, 8vw, 110px); }
+  .room__head { margin-bottom: 10px; }
+  .crumbs { font: 600 12px var(--fb); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); display: flex; gap: 10px; }
+  .crumbs a { color: inherit; }
+  .room h1 { font-size: clamp(42px, 5.4vw, 76px); margin: 10px 0 0; }
+  .cols { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+  .cols a { display: inline-flex; align-items: center; gap: 8px; font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .08em; text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; }
+  .cols a:hover { border-bottom-color: var(--accent); }
+  .cols i, .grp h2 i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+  .cols__own i { background: conic-gradient(#c9a227, #a8553a, #6d2235, #56708f, #8fa98a, #c9a227); }
+  .grp { padding-top: clamp(44px, 5vw, 70px); scroll-margin-top: 100px; }
+  .grp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .grp h2 { display: flex; align-items: center; gap: 14px; margin: 0; font-size: clamp(28px, 3vw, 42px); }
+  .grp h2 i { width: 16px; height: 16px; }
+  .grp__head span { font: var(--flst) var(--flw) 13px var(--fl); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); }
+  .gal > [hidden] { display: none; }
+  .sty + .sty { margin-top: 34px; }
+  .sty__h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; font: var(--flst) var(--flw) 17px var(--fl); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+  .sty__h small { font: 600 11px var(--fb); letter-spacing: .1em; color: var(--lab); }
+  .more { display: block; margin: 22px auto 0; background: none; border: 0; border-bottom: 1px solid var(--accent); padding: 6px 2px; cursor: pointer; color: var(--ink);
+    font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; }
+  .room__jump { font: var(--flst) var(--flw) 15px var(--fl); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 4px; white-space: nowrap; }
+
+  /* Justified rows: every photo whole, in its own shape; the script sets widths so each row fills the line. */
+  .gal { display: flex; flex-wrap: wrap; gap: 12px; }
+  .gal--flow { gap: 26px 12px; margin-top: clamp(36px, 4vw, 56px); }
+  .tile { display: flex; flex-direction: column; gap: 10px; width: calc(25% - 9px); cursor: zoom-in; text-decoration: none; color: var(--ink); scroll-margin-top: 110px; }
+  .tile__img { display: block; overflow: hidden; background: var(--tint); }
+  .tile__img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+  .tile:hover img { transform: scale(1.03); }
+  .tile__cap { display: flex; align-items: center; gap: 8px; min-width: 0; font: var(--flst) var(--flw) 13px var(--fl); letter-spacing: .1em; text-transform: uppercase; color: var(--lab); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile__cap i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+
+  /* Made in your colour */
+  .own { background: var(--ground); border-block: 1px solid var(--line); padding: clamp(60px, 8vw, 110px) 0; scroll-margin-top: 84px; }
+  .own__in { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 6vw, 96px); align-items: center; }
+  .own__swatch { position: relative; margin: 0; aspect-ratio: 4 / 5; overflow: hidden; background: var(--dye, #8fa98a); transition: background .5s ease; }
+  .own__swatch::after { content: ''; position: absolute; inset: 12px; border: 1px solid rgba(255,255,255,.55); pointer-events: none; }
+  .own__swatch figcaption { position: absolute; left: 32px; bottom: 30px; color: #fff; display: grid; gap: 4px; transition: color .5s ease; }
+  [data-light] .own__swatch figcaption { color: #1c1a18; }
+  [data-light] .own__swatch::after { border-color: rgba(0,0,0,.18); }
+  .own__swatch figcaption span { font: var(--fdw) clamp(28px, 2.6vw, 38px)/1 var(--fd); font-style: italic; }
+  .own__swatch figcaption small { font: 600 11px var(--fb); letter-spacing: .2em; text-transform: uppercase; opacity: .85; }
+
+  .own__form { display: grid; gap: 22px; justify-items: start; max-width: 480px; }
+  .own__form .orn { margin-bottom: -6px; }
+  .own__form h2 { font-size: clamp(34px, 3.6vw, 52px); margin: 0; }
+
+  .shades { display: flex; flex-wrap: wrap; gap: 12px; }
+  .shades button, .shades__own { width: 34px; height: 34px; border-radius: 50%; padding: 0; border: 0; cursor: pointer; background: var(--c);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); outline: 1px solid transparent; outline-offset: 4px; transition: outline-color .25s, transform .25s; }
+  .shades button:hover, .shades__own:hover { transform: translateY(-2px); }
+  .shades [aria-checked='true'], .shades__own.is-on { outline-color: var(--accent); }
+  .shades__own { position: relative; display: block; background: conic-gradient(#c9a227, #a8553a, #6d2235, #56708f, #8fa98a, #c9a227); }
+  .shades__own::after { content: '+'; position: absolute; inset: 7px; border-radius: 50%; background: var(--ground); display: grid; place-items: center; font: 300 17px/1 var(--fb); color: var(--ink); }
+  .shades__own input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+
+  .own__field { width: 100%; }
+  .own__field input { width: 100%; font: italic 400 19px var(--fd); padding: 10px 0; border: 0; border-bottom: 1px solid var(--accent); background: transparent; color: var(--ink); }
+  .own__field input::placeholder { color: color-mix(in srgb, var(--ink) 45%, transparent); }
+  .own__field input:focus { outline: none; border-bottom-width: 2px; }
+
+  .own__terms { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+  .own__terms li { padding: 4px 14px; border-left: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); font-size: 13.5px; line-height: 1.45; color: color-mix(in srgb, var(--ink) 80%, transparent); }
+  .own__terms li:first-child { border-left: 0; padding-left: 0; }
+  .own__terms b { display: block; font: var(--flst) var(--flw) 13px var(--fl); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); margin-bottom: 4px; }
+
+  .pn { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 20px; padding-top: 40px; padding-bottom: 90px; }
+  .pn a { text-decoration: none; display: grid; gap: 6px; font: var(--fdw) clamp(24px, 2.4vw, 34px)/1.1 var(--fd); }
+  .pn a:last-child { text-align: right; }
+  .pn small { font: 600 11px var(--fb); letter-spacing: .16em; text-transform: uppercase; color: var(--lab); }
+  .pn .pn__all { font: 600 12px var(--fb); letter-spacing: .16em; text-transform: uppercase; border-bottom: 1px solid var(--accent); padding-bottom: 4px; }
+
+  @media (max-width: 820px) { .own__in { grid-template-columns: 1fr; } .own__swatch { aspect-ratio: 4 / 3; } }
+  @media (max-width: 640px) {
+    .room__head { flex-direction: column; align-items: start; }
+    .gal { gap: 8px; } .gal--flow { gap: 20px 8px; } .tile__cap { font-size: 11px; }
+    .shades { gap: 9px; } .shades button, .shades__own { width: 30px; height: 30px; } .shades__own::after { inset: 6px; }
+    .own__terms { grid-template-columns: 1fr; gap: 10px; }
+    .own__terms li { border-left: 0; padding: 0 0 10px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+    .pn { grid-template-columns: 1fr 1fr; } .pn .pn__all { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+  }
+</style>
+
+<script>
+  import { syncQuote } from '../../scripts/site';
+  import { justifyAll } from '../../scripts/justify';
+  const own = document.querySelector<HTMLElement>('[data-own]')!;
+  const cat = own.dataset.cat!;
+  const catName = own.dataset.catName!;
+  const shades = [...own.querySelectorAll<HTMLButtonElement>('[data-shade]')];
+  const ownPick = own.querySelector<HTMLElement>('.shades__own')!;
+  const colorIn = own.querySelector<HTMLInputElement>('[data-own-color]')!;
+  const pantoneIn = own.querySelector<HTMLInputElement>('[data-own-pantone]')!;
+  const add = own.querySelector<HTMLButtonElement>('[data-own-add]')!;
+  let hex = '#8FA98A';
+  let label = 'Sage';
+
+  function paint() {
+    const pan = pantoneIn.value.trim();
+    own.style.setProperty('--dye', hex);
+    // Dark caption on light shades so the name stays readable.
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    own.toggleAttribute('data-light', 0.299 * r + 0.587 * g + 0.114 * b > 165);
+    own.querySelector('[data-own-name]')!.textContent = pan || label;
+    own.querySelector('[data-own-hex]')!.textContent = pan ? `${label} · ${hex}` : hex;
+    add.dataset.add = `custom-${cat}-${(pan || hex).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    add.dataset.name = `${catName} · ${pan ? `Pantone ${pan}` : `${label} ${hex}`}`;
+    syncQuote();
+  }
+  const select = (btn: HTMLButtonElement | null) => {
+    shades.forEach((b) => b.setAttribute('aria-checked', String(b === btn)));
+    ownPick.classList.toggle('is-on', !btn);
+  };
+
+  shades.forEach((b) => b.addEventListener('click', () => {
+    hex = b.dataset.shade!.toUpperCase(); label = b.dataset.name!; select(b); paint();
+  }));
+  colorIn.addEventListener('input', () => { hex = colorIn.value.toUpperCase(); label = 'Your colour'; select(null); paint(); });
+  pantoneIn.addEventListener('input', paint);
+  paint();
+
+  // Rows sized to the screen: taller on desktop, shorter on phones.
+  const relayout = justifyAll('[data-justify]', { target: () => (innerWidth > 1100 ? 360 : innerWidth > 640 ? 290 : 230), maxPerRow: () => (innerWidth > 640 ? 5 : 2) });
+
+  // Each colour shows its first tiles; "Show all" reveals the rest.
+  document.querySelectorAll<HTMLButtonElement>('[data-more]').forEach((b) => b.addEventListener('click', () => {
+    const grp = b.closest('[data-grp]')!;
+    grp.querySelectorAll<HTMLElement>('.gal > [hidden]').forEach((el) => (el.hidden = false));
+    relayout(grp.querySelector<HTMLElement>('.gal')!);
+    b.remove();
+  }));
+
+</script>

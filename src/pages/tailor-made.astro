@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Gallery from '../components/Gallery.astro';
+import { customisation, terms } from '../data/catalogue';
+import { pick, inFolder } from '../data/shoot';
+
+const patterns = inFolder('product-closeup').map((p) => p.src);
+const folded = inFolder('product-sku').map((p) => p.src);
+const inHand = [...inFolder('hand-towel'), ...inFolder('face-towel')].map((p) => p.src);
+---
+<Base title="Tailor-made · Emsworth Hospitality" overHero
+  description="Jacquard woven logos, embroidery, dobby and satin borders, Pantone-matched dyes and yarn-dyed stripes: what it costs in time and minimums.">
+  <PageHero image={pick('product-closeup', 'j8a2338')} alt="Navy and ivory jacquard towel with a woven Emsworth label" focus="50% 50%"
+    kicker="Tailor-made" title="Your crest,<br/><em>woven in.</em>"
+    intro="Every article in the catalogue can be built to your own dimension, border, colour and branding. Here is what each option adds in time and minimum quantity." />
+
+  <section class="sec">
+    <div class="wrap opts">
+      {customisation.map((g) => (
+        <div class="opt frame reveal">
+          <h2>{g.group}</h2>
+          <ul>{g.items.map(([n, d, t]) => <li><b>{n}</b><span>{d}</span><em>{t}</em></li>)}</ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">Pattern library · {patterns.length} weaves</span>
+        <h2>What our <em>jacquard looms</em> can weave</h2>
+        <p class="lead">Yarn-dyed swirls, checks, waves, stripes and animal prints, each finished with a woven Emsworth label. Start from one of these, or send us your own artwork.</p>
+      </div>
+      <Gallery items={patterns} cap="Pattern library" cols={4} />
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">Folded &amp; finished · {folded.length} photos</span>
+        <h2>Colourways, sets <em>and packaging</em></h2>
+        <p class="lead">Solid colours, coordinated bath sets and presentation: kraft gift boxes, belly bands and folded made-ups, as they leave the packing floor.</p>
+      </div>
+      <Gallery items={[...folded, pick('slipper-robe', 'j8a2550-edit')]} cap="Folded & finished" cols={4} />
+    </div>
+  </section>
+
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">In the hand · {inHand.length} photos</span>
+        <h2>The feel <em>comes first</em></h2>
+        <p class="lead">Hand and face towels, squeezed and held, because that is how a guest judges them.</p>
+      </div>
+      <Gallery items={inHand} cap="In the hand" cols={5} />
+    </div>
+  </section>
+
+  <section class="sec sec--primary on-dark">
+    <div class="wrap terms">
+      <div class="sec__head reveal">
+        <span class="label">Terms</span>
+        <h2>Sampling, production <em>and shipping</em></h2>
+        <a class="btn" href="/request-a-quote/">Request a sample</a>
+      </div>
+      <dl class="reveal">{terms.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .opt h2 { font-size: clamp(30px, 3vw, 42px); margin-bottom: 14px; }
+  .opt ul { list-style: none; margin: 0; padding: 0; }
+  .opt li { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 14px 0; border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .opt b { font: 400 20px var(--fd); color: var(--primary); }
+  .opt span { font-size: 15px; color: var(--soft); }
+  .opt em { font: var(--flst) 13px var(--fl); color: var(--lab); }
+  .terms { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(30px, 6vw, 90px); align-items: start; }
+  .terms .sec__head { justify-items: start; }
+  .terms dl { margin: 0; }
+  .terms dl div { display: grid; grid-template-columns: 30% 1fr; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .terms dt { font: var(--flst) var(--flw) 12px var(--fl); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); padding-top: 3px; }
+  .terms dd { margin: 0; }
+  @media (max-width: 820px) { .opts, .terms { grid-template-columns: 1fr; } }
+</style>

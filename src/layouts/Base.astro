@@ -1,0 +1,189 @@
+---
+import '../styles/global.css';
+import logo from '../assets/logo.svg?raw';
+import { collections, ranges } from '../data/catalogue';
+
+interface Props { title: string; description?: string; overHero?: boolean }
+const {
+  title,
+  description = 'Hotel textiles woven in Tamil Nadu and supplied from Dubai: bath, bed, table, pool and spa linen, robes and slippers, made to your specification.',
+  overHero = false,
+} = Astro.props;
+const nav = [
+  ['Collections', '/collections/'], ['Ranges', '/ranges/'], ['Tailor-made', '/tailor-made/'], ['Heritage', '/heritage/'], ['Lookbook', '/lookbook/'],
+];
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en" data-palette="navy" data-type="caslon" data-theme="heritage">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <!-- Apply the saved design choice before first paint, so there is no flash. -->
+  <script is:inline>
+    (function () {
+      var d = {};
+      try { d = JSON.parse(localStorage.getItem('emsworth-design') || '{}'); } catch (e) {}
+      var q = new URLSearchParams(location.search);
+      ['palette', 'type', 'theme'].forEach(function (k) { if (q.get(k)) d[k] = q.get(k); if (d[k]) document.documentElement.dataset[k] = d[k]; });
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class:list={['hdr', { 'hdr--over': overHero }]} data-hdr>
+    <div class="hdr__in wrap">
+      <a class="hdr__logo" href="/" aria-label="Emsworth Hospitality, home"><Fragment set:html={logo} /></a>
+      <nav class="hdr__nav" aria-label="Main">
+        {nav.map(([t, h]) => <a href={h} aria-current={path.startsWith(h) ? 'page' : undefined}>{t}</a>)}
+      </nav>
+      <a class="hdr__quote" href="/request-a-quote/">Quote <span data-count>0</span></a>
+      <button class="hdr__burger" aria-label="Menu" aria-expanded="false" data-burger><span></span><span></span></button>
+    </div>
+    <div class="hdr__panel" data-panel hidden>
+      <nav class="wrap" aria-label="Mobile">
+        {nav.map(([t, h]) => <a href={h}>{t}</a>)}
+        <a href="/request-a-quote/">Request a quote</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main"><slot /></main>
+
+  <footer class="ftr on-dark">
+    <div class="wrap">
+      <div class="ftr__top">
+        <div class="ftr__brand">
+          <a class="ftr__logo" href="/" aria-label="Emsworth Hospitality"><Fragment set:html={logo} /></a>
+          <p class="ftr__tag">The feel comes first.</p>
+          <p>Hotel textiles woven in Tamil Nadu and supplied from Dubai to the UAE, GCC, Middle East and Africa.</p>
+          <a class="btn" href="/request-a-quote/">Request a quote</a>
+        </div>
+        <div class="ftr__cols">
+          <div><span class="label">Collections</span>{collections.map((c) => <a href={`/collections/${c.slug}/`}>{c.name}</a>)}</div>
+          <div><span class="label">Ranges</span>{ranges.map((r) => <a href={`/ranges/${r.slug}/`}>{r.name}</a>)}</div>
+          <div><span class="label">Company</span><a href="/tailor-made/">Tailor-made</a><a href="/heritage/">Heritage</a><a href="/lookbook/">Lookbook</a>
+            <a href="mailto:info@emsworthhospitality.com">info@emsworthhospitality.com</a></div>
+        </div>
+      </div>
+      <hr class="rule" />
+      <p class="ftr__fine">© 2026 Emsworth Hospitality LLC FZ, Dubai. Manufactured by Christy Textile Products Pvt. Ltd., Tiruchengode, Tamil Nadu. Specifications per the 2026 catalogue: GSM ±5%, dimensions ±3%.</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox for every gallery -->
+  <dialog class="lb" data-lb aria-label="Photo viewer">
+    <img data-lb-img alt="" />
+    <p class="lb__cap" data-lb-cap></p>
+    <button class="lb__btn lb__close" data-lb-close aria-label="Close">✕</button>
+    <button class="lb__btn lb__prev" data-lb-prev aria-label="Previous">‹</button>
+    <button class="lb__btn lb__next" data-lb-next aria-label="Next">›</button>
+  </dialog>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+  <!-- Design switcher: lets the client compare the shortlisted directions on the real site. -->
+  <div class="ds" data-ds>
+    <button class="ds__toggle" data-ds-toggle aria-expanded="false">Design</button>
+    <div class="ds__panel" data-ds-panel hidden>
+      <p class="ds__h">Palette</p>
+      <div class="ds__row" data-ds-group="palette">
+        <button data-v="navy">Navy &amp; Gold</button><button data-v="claret">Oxford Claret</button><button data-v="navybeige">Navy, Beige &amp; Gold</button>
+      </div>
+      <p class="ds__h">Typeface</p>
+      <div class="ds__row" data-ds-group="type">
+        <button data-v="caslon">Caslon</button><button data-v="bentham">Bentham</button><button data-v="gloock">Gloock</button>
+      </div>
+      <p class="ds__h">Theme</p>
+      <div class="ds__row" data-ds-group="theme">
+        <button data-v="heritage">Heritage</button><button data-v="split">Split Screen</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+  import '../scripts/site.ts';
+</script>
+
+<style is:global>
+  .skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--ground); padding: 8px 14px; }
+  .skip:focus { left: 8px; }
+
+  /* Header */
+  .hdr { position: sticky; top: 0; z-index: 50; background: var(--primary); color: var(--ground); transition: background .35s, box-shadow .35s; }
+  .hdr--over { position: fixed; left: 0; right: 0; background: transparent; }
+  .hdr--over.hdr--solid, .hdr.hdr--open { background: var(--primary); box-shadow: 0 10px 30px -20px rgba(0,0,0,.5); }
+  .hdr__in { display: flex; align-items: center; gap: 28px; height: 84px; }
+  .hdr__logo { display: block; color: var(--ground); width: clamp(150px, 15vw, 196px); flex: none; }
+  .hdr__logo svg, .ftr__logo svg { display: block; width: 100%; height: auto; }
+  .hdr__nav { display: flex; gap: clamp(16px, 2.2vw, 34px); margin-left: auto; }
+  .hdr__nav a, .hdr__panel a { font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; padding: 6px 0; border-bottom: 1px solid transparent; }
+  .hdr__nav a:hover, .hdr__nav a[aria-current='page'] { border-bottom-color: var(--accent); }
+  .hdr__quote { font: 700 11px var(--fb); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; border: 1px solid var(--accent); padding: 10px 14px; display: inline-flex; gap: 8px; align-items: center; }
+  .hdr__quote span { background: var(--accent); color: var(--dark); border-radius: 999px; min-width: 20px; height: 20px; display: inline-grid; place-items: center; font-size: 10px; letter-spacing: 0; }
+  .hdr__burger { display: none; width: 44px; height: 44px; background: none; border: 0; padding: 10px; cursor: pointer; }
+  .hdr__burger span { display: block; height: 1.5px; background: var(--ground); margin: 6px 0; transition: transform .3s; }
+  .hdr--open .hdr__burger span:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .hdr--open .hdr__burger span:last-child { transform: translateY(-4px) rotate(-45deg); }
+  .hdr__panel { background: var(--primary); border-top: 1px solid var(--line); }
+  .hdr__panel nav { display: grid; padding-top: 12px; padding-bottom: 24px; }
+  .hdr__panel a { font-size: 17px; padding: 14px 0; border-bottom: 1px solid color-mix(in srgb, var(--ground) 12%, transparent); }
+  @media (max-width: 1020px) {
+    .hdr__nav { display: none; }
+    .hdr__quote { margin-left: auto; }
+    .hdr__burger { display: block; }
+    .hdr__in { height: 70px; gap: 12px; }
+  }
+
+  /* Footer */
+  .ftr { background: var(--dark); color: var(--on-dark); padding: 80px 0 40px; }
+  .ftr__top { display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; margin-bottom: 50px; }
+  .ftr__logo { display: block; color: var(--ground); width: 220px; margin-bottom: 18px; }
+  .ftr__tag { font: italic 400 26px var(--fd); color: var(--ground); margin: 0 0 8px; }
+  .ftr__brand p { max-width: 40ch; margin: 0 0 24px; }
+  .ftr__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+  .ftr__cols div { display: grid; gap: 10px; align-content: start; }
+  .ftr__cols .label { margin-bottom: 6px; }
+  .ftr__cols a { text-decoration: none; font-size: 15px; overflow-wrap: anywhere; }
+  .ftr__cols a:hover { color: var(--accent); }
+  .ftr__fine { font-size: 13px; opacity: .7; margin: 26px 0 0; max-width: 90ch; }
+  @media (max-width: 860px) { .ftr__top, .ftr__cols { grid-template-columns: 1fr; gap: 34px; } }
+
+  /* Lightbox */
+  .lb { padding: 0; border: 0; max-width: none; max-height: none; width: 100vw; height: 100dvh; background: rgba(8,10,18,.94); color: #fff; }
+  .lb[open] { display: grid; place-items: center; }
+  .lb::backdrop { background: rgba(0,0,0,.6); }
+  .lb img { max-width: min(92vw, 1500px); max-height: 84dvh; width: auto; height: auto; object-fit: contain; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .lb__cap { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font: var(--flst) 13px var(--fl); letter-spacing: .14em; text-transform: uppercase; opacity: .75; margin: 0; }
+  .lb__btn { position: absolute; background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.25); width: 52px; height: 52px; border-radius: 50%; font-size: 26px; cursor: pointer; }
+  .lb__btn:hover { background: rgba(255,255,255,.18); }
+  .lb__close { top: 18px; right: 18px; font-size: 18px; }
+  .lb__prev { left: 18px; top: 50%; transform: translateY(-50%); }
+  .lb__next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+  /* Toast */
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 140%); background: var(--primary); color: var(--ground); padding: 14px 22px; font-size: 14px; z-index: 60; transition: transform .4s cubic-bezier(.2,.7,.2,1); border-top: 2px solid var(--accent); max-width: calc(100vw - 32px); }
+  .toast { opacity: 0; visibility: hidden; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
+  .toast a { color: var(--accent); }
+
+  /* Design switcher */
+  .ds { position: fixed; left: 16px; bottom: 16px; z-index: 55; font-family: var(--fb); }
+  .ds__toggle { background: var(--ground); color: var(--primary); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; font: 700 11px var(--fb); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 30px -14px rgba(0,0,0,.5); }
+  .ds__panel { position: absolute; left: 0; bottom: 52px; width: min(330px, calc(100vw - 32px)); background: var(--ground); color: var(--ink); border: 1px solid var(--line); padding: 16px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.55); }
+  .ds__h { margin: 0 0 6px; font: 700 10px var(--fb); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); }
+  .ds__row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ds__row:last-child { margin-bottom: 0; }
+  .ds__row button { font: 600 12.5px var(--fb); padding: 7px 11px; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); background: none; color: var(--ink); cursor: pointer; }
+  .ds__row button[aria-pressed='true'] { background: var(--primary); color: var(--ground); border-color: var(--primary); }
+  @media (max-width: 700px) { .ds { left: auto; right: 12px; bottom: 12px; } .ds__panel { left: auto; right: 0; } .ds__toggle { padding: 8px 12px; font-size: 10px; } }
+</style>
