@@ -1,0 +1,93 @@
+---
+// Inner-page opening: image with framed title (Heritage) or colour panel beside it (Split).
+// `image` is a shoot photo, or a path under /images/ (the main site's banners, served as -800/-1600/-2400.webp).
+import { Image } from 'astro:assets';
+interface Props { image: ImageMetadata | string; alt: string; kicker: string; title: string; intro?: string; focus?: string; crumbs?: [string, string][]; whole?: boolean }
+const { image, alt, kicker, title, intro, focus = '50% 50%', crumbs = [], whole = false } = Astro.props;
+// `whole`: show the entire photo, in any theme. A landscape photo fills the width at its own height; a portrait one
+// gets a column exactly its shape beside the text, so nothing (and no face) is cropped.
+const ar = typeof image === 'string' ? 1.5 : image.width / image.height;
+const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port') : '';
+---
+<section class:list={['ph', wholeCls]} style={whole ? `--ar: ${ar.toFixed(4)}` : undefined}>
+  <div class="ph__img inset">
+    {whole && ar >= 1 && typeof image !== 'string' && <Image class="ph__fill" src={image} alt="" widths={[640]} sizes="40vw" aria-hidden="true" />}
+    {typeof image === 'string'
+      ? <img src={`/images/${image}-1600.webp`} srcset={[800, 1600, 2400].map((w) => `/images/${image}-${w}.webp ${w}w`).join(', ')} sizes="100vw" alt={alt} loading="eager" fetchpriority="high" style={`object-position:${focus}`} />
+      : <Image src={image} alt={alt} widths={[640, 1100, 1700]} sizes="100vw" loading="eager" fetchpriority="high" style={`object-position:${focus}`} />}
+  </div>
+  <div class="ph__panel">
+    <div class="ph__in">
+      {crumbs.length > 0 && (
+        <nav class="ph__crumbs" aria-label="Breadcrumb">{crumbs.map(([t, h]) => <a href={h}>{t}</a>)}</nav>
+      )}
+      <span class="label label--light">{kicker}</span>
+      <h1 set:html={title} />
+      {intro && <p>{intro}</p>}
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .ph { position: relative; min-height: max(100svh, 560px); display: grid; color: var(--ground); background: var(--dark); }
+  .ph__img { position: absolute; inset: 0; overflow: hidden; }
+  /* Absolute, so a tall photo can never stretch the header and push the words below the screen. */
+  .ph__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ph__img::before { content: ''; position: absolute; inset: 0; z-index: 1; background:
+    linear-gradient(180deg, color-mix(in srgb, var(--dark) 70%, transparent), transparent 30%),
+    linear-gradient(90deg, color-mix(in srgb, var(--dark) 92%, transparent) 0%, color-mix(in srgb, var(--dark) 50%, transparent) 48%, transparent 78%); }
+  .ph__img.inset::after { inset: 96px 20px 20px; z-index: 2; }
+  .ph__panel { position: relative; z-index: 3; display: flex; align-items: flex-end; max-width: var(--max); width: 100%; margin: 0 auto; padding: 140px var(--gutter) clamp(56px, 8vw, 96px); }
+  .ph__in { max-width: 640px; display: grid; gap: 16px; justify-items: start; }
+  .ph h1 { color: var(--ground); font-size: clamp(46px, 7vw, 96px); }
+  .ph p { margin: 0; font-size: clamp(17px, 1.5vw, 20px); color: var(--on-dark); max-width: 52ch; }
+  .ph__crumbs { display: flex; gap: 10px; font-size: 13px; opacity: .8; }
+  .ph__crumbs a + a::before { content: '/'; margin-right: 10px; opacity: .6; }
+  .ph__crumbs a { text-decoration: none; }
+  @media (max-width: 600px) {
+    .ph__img::before { background:
+      linear-gradient(180deg, color-mix(in srgb, var(--dark) 70%, transparent), transparent 24%),
+      linear-gradient(0deg, color-mix(in srgb, var(--dark) 96%, transparent) 0%, color-mix(in srgb, var(--dark) 82%, transparent) 50%, color-mix(in srgb, var(--dark) 25%, transparent) 82%); }
+    .ph__img.inset::after { inset: 78px 8px 8px; }
+  }
+
+  /* Split Screen: solid colour panel left, photo right */
+  :global([data-theme='split']) .ph { grid-template-columns: minmax(0, 44%) minmax(0, 56%); background: var(--primary); }
+  :global([data-theme='split']) .ph__img { position: relative; inset: auto; grid-column: 2; grid-row: 1; min-height: inherit; }
+  :global([data-theme='split']) .ph__img::before { background: linear-gradient(180deg, color-mix(in srgb, var(--dark) 55%, transparent), transparent 26%); }
+  :global([data-theme='split']) .ph__panel { grid-column: 1; grid-row: 1; padding-left: var(--gutter); padding-right: clamp(20px, 3vw, 48px); margin: 0; align-items: center; padding-top: 120px; }
+  @media (max-width: 820px) {
+    :global([data-theme='split']) .ph { grid-template-columns: 1fr; }
+    :global([data-theme='split']) .ph__img { grid-column: 1; grid-row: 1; min-height: 46svh; }
+    :global([data-theme='split']) .ph__panel { grid-row: 2; padding-top: 40px; }
+  }
+
+  /* Whole photo, landscape: full width, as tall as the photo; words sit in the first screen. */
+  :global(html) .ph--land { display: grid; grid-template-columns: 1fr; min-height: 0; height: max(100svh, 560px); background: var(--dark); }
+  /* The photo is shown whole inside one screen; a blurred copy of it fills any space at the sides. */
+  :global(html) .ph--land .ph__img img:not(.ph__fill) { object-fit: contain; z-index: 0; }
+  :global(html) .ph--land .ph__fill { object-fit: cover; filter: blur(28px) saturate(1.1); transform: scale(1.15); }
+  :global(html) .ph--land .ph__img { position: absolute; inset: 0; grid-column: auto; grid-row: auto; min-height: 0; }
+  :global(html) .ph--land .ph__img::before { background:
+    linear-gradient(180deg, color-mix(in srgb, var(--dark) 60%, transparent), transparent 22%),
+    linear-gradient(90deg, color-mix(in srgb, var(--dark) 88%, transparent) 0%, color-mix(in srgb, var(--dark) 40%, transparent) 45%, transparent 70%); }
+  :global(html) .ph--land .ph__panel { grid-column: 1; grid-row: 1; margin: 0 auto; align-items: flex-start; padding-top: max(150px, calc(50svh - 170px)); }
+  /* Whole photo, portrait: text on the colour panel, photo in a column of exactly its own shape. */
+  :global(html) .ph--port { display: grid; grid-template-columns: minmax(0, 1fr) calc(max(100svh, 560px) * var(--ar)); height: max(100svh, 560px); min-height: 0; background: var(--primary); }
+  :global(html) .ph--port .ph__img { position: relative; inset: auto; grid-column: 2; grid-row: 1; min-height: 0; }
+  :global(html) .ph--port .ph__img::before { background: linear-gradient(180deg, color-mix(in srgb, var(--dark) 55%, transparent), transparent 22%); }
+  :global(html) .ph--port .ph__panel { grid-column: 1; grid-row: 1; margin: 0; align-items: center; padding: 110px clamp(20px, 3vw, 48px) 40px max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
+  :global(html) .ph--port .ph__img.inset::after, :global(html) .ph--land .ph__img.inset::after { display: none; }
+  @media (max-width: 820px) {
+    :global(html) .ph--port { grid-template-columns: 1fr; height: auto; }
+    :global(html) .ph--port .ph__img { grid-row: 1; aspect-ratio: var(--ar); max-height: 80svh; }
+    :global(html) .ph--port .ph__img img { object-position: 50% 10%; }
+    :global(html) .ph--port .ph__panel { grid-row: 2; padding: 32px var(--gutter) 40px; }
+    :global(html) .ph--land { height: auto; }
+    :global(html) .ph--land .ph__img { position: relative; aspect-ratio: var(--ar); grid-row: 1; }
+    :global(html) .ph--land .ph__fill { display: none; }
+    :global(html) .ph--land .ph__panel { grid-row: 2; padding: 28px var(--gutter) 40px; background: var(--dark); }
+    :global(html) .ph--land .ph__img::before { background: none; }
+  }
+</style>

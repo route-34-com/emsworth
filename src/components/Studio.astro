@@ -1,0 +1,85 @@
+---
+---
+<section class="studio" id="studio" data-theme-section="teal">
+  <div class="studio__head">
+    <h2 class="split">Design it. <em>We'll weave it.</em></h2>
+    <p>Every article can be built to your specification. Try it — then add the spec to your quote for our sampling team.</p>
+  </div>
+  <div class="studio__grid">
+    <div class="studio__stage">
+      <div class="studio__rail"></div>
+      <svg class="towel" id="towel" viewBox="0 0 400 640" aria-label="Towel preview">
+        <defs>
+          <filter id="pile" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence id="pileTurb" type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="n"/>
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.1" result="shade"/>
+            <feComposite in="shade" in2="SourceGraphic" operator="in" result="s"/>
+            <feBlend in="SourceGraphic" in2="s" mode="multiply" result="b"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="9" result="w"/>
+            <feDisplacementMap id="pileDisp" in="b" in2="w" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <pattern id="patDobby" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="var(--tw-band)"/><rect x="0" y="0" width="6" height="6" fill="var(--tw-shade)"/><rect x="6" y="6" width="6" height="6" fill="var(--tw-shade)"/></pattern>
+          <pattern id="patJacq" width="36" height="44" patternUnits="userSpaceOnUse"><rect width="36" height="44" fill="var(--tw-shade)"/><g transform="translate(5,4) scale(0.1)" style="color:var(--tw-band)"><use href="#loop"/></g></pattern>
+          <linearGradient id="gSatin" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="var(--tw-band)"/><stop id="satinHi" offset="0.5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="var(--tw-band)"/></linearGradient>
+          <clipPath id="towelClip"><rect id="towelClipRect" x="40" y="40" width="320" height="560" rx="10"/></clipPath>
+        </defs>
+        <g id="towelBody">
+          <g clip-path="url(#towelClip)" filter="url(#pile)">
+            <rect id="towelBase" x="40" y="40" width="320" height="560" fill="var(--tw-color)"/>
+            <g id="bandTop"></g><g id="bandBot"></g>
+          </g>
+          <text id="towelText" x="200" y="380" text-anchor="middle">Aurum</text>
+        </g>
+      </svg>
+      <div class="studio__code"><span>Article</span><b id="specCode">EM-BT-SG-70140</b></div>
+    </div>
+    <form class="studio__panel" id="studioForm" onsubmit="return false">
+      <fieldset><legend>Item</legend>
+        <div class="seg" data-key="size">
+          <button type="button" data-v="BS" data-w="90" data-h="180">Bath sheet</button>
+          <button type="button" data-v="BT" data-w="70" data-h="140" class="on">Bath towel</button>
+          <button type="button" data-v="HT" data-w="40" data-h="70">Hand towel</button>
+          <button type="button" data-v="FT" data-w="30" data-h="30">Face towel</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Colour <small id="colourName">Optical White</small></legend>
+        <div class="swatches" data-key="colour">
+          <button type="button" class="on" style="--c:#F8F5EF" data-name="Optical White" data-v="#F8F5EF"></button>
+          <button type="button" style="--c:#E9D6BF" data-name="Desert Sand" data-v="#E9D6BF"></button>
+          <button type="button" style="--c:#C9B8A6" data-name="Spa Beige" data-v="#C9B8A6"></button>
+          <button type="button" style="--c:#8E9A8C" data-name="Sage" data-v="#8E9A8C"></button>
+          <button type="button" style="--c:#0C3C3A" data-name="Emsworth Teal" data-v="#0C3C3A"></button>
+          <button type="button" style="--c:#1F2E5A" data-name="Cabana Navy" data-v="#1F2E5A"></button>
+          <button type="button" style="--c:#4A4B4D" data-name="Charcoal" data-v="#4A4B4D"></button>
+          <button type="button" style="--c:#D9A79A" data-name="Blush" data-v="#D9A79A"></button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Border</legend>
+        <div class="seg" data-key="border">
+          <button type="button" data-v="dobby" class="on">Dobby</button>
+          <button type="button" data-v="satin">Satin band</button>
+          <button type="button" data-v="jacquard">Jacquard</button>
+          <button type="button" data-v="cam">Cam</button>
+          <button type="button" data-v="none">Plain</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Weight <small><b id="gsmVal">650</b> GSM · <span id="gsmTier">Signature</span></small></legend>
+        <input type="range" id="gsm" min="400" max="750" step="10" value="650" aria-label="GSM">
+        <div class="range-labels"><span>Light, fast-drying</span><span>Plush, heavy hand</span></div>
+      </fieldset>
+      <fieldset><legend>Embroidery</legend>
+        <div class="emb">
+          <input type="text" id="embText" maxlength="14" value="Aurum" placeholder="Your property" aria-label="Embroidery text">
+          <div class="threads" data-key="thread">
+            <button type="button" class="on" style="--c:#B8955E" data-v="#B8955E" aria-label="Gold thread"></button>
+            <button type="button" style="--c:#0C3C3A" data-v="#0C3C3A" aria-label="Teal thread"></button>
+            <button type="button" style="--c:#FFFFFF" data-v="#FFFFFF" aria-label="White thread"></button>
+            <button type="button" style="--c:#1F2E5A" data-v="#1F2E5A" aria-label="Navy thread"></button>
+          </div>
+        </div>
+      </fieldset>
+      <p class="studio__advice" id="advice">Suites, presidential floors and spa — where the towel argues for the room rate.</p>
+      <button type="button" class="btn btn--sand btn--wide magnetic" id="sendSpec"><span>Add this spec to my quote</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+  </div>
+</section>

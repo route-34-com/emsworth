@@ -1,0 +1,26 @@
+{
+  "name": "emsworth-royal",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/react": "^7.1.1",
+    "@fontsource-variable/nunito-sans": "^5.3.0",
+    "@fontsource/bentham": "^5.3.0",
+    "@fontsource/bodoni-moda": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/gloock": "^5.3.0",
+    "@fontsource/libre-caslon-display": "^5.3.0",
+    "@fontsource/libre-caslon-text": "^5.3.0",
+    "@fontsource/mulish": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "astro": "^7.4.2",
+    "gsap": "^3.12.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

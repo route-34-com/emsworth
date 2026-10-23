@@ -1,0 +1,12 @@
+---
+interface Props { title: string; text: string; href: string; label: string; }
+const { title, text, href, label } = Astro.props;
+---
+<section class="ctaband" data-theme-section="teal">
+  <svg class="ctaband__loop" viewBox="0 0 270 420" aria-hidden="true"><use href="#loop"/></svg>
+  <div class="ctaband__inner">
+    <h2 class="split" set:html={title} />
+    <p>{text}</p>
+    <a href={href} class="btn btn--sand magnetic"><span>{label}</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</section>

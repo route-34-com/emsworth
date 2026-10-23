@@ -1,0 +1,67 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Program from '../../components/Program.astro';
+import Gallery from '../../components/Gallery.astro';
+import { collections, type Collection } from '../../data/catalogue';
+
+export function getStaticPaths() {
+  return collections.map((c) => ({ params: { slug: c.slug }, props: { c } }));
+}
+interface Props { c: Collection }
+const { c } = Astro.props;
+const i = collections.indexOf(c);
+const next = collections[(i + 1) % collections.length];
+---
+<Base title={`${c.name} · Emsworth Hospitality`} description={c.intro} overHero>
+  <PageHero image={c.image} alt={c.alt} kicker={c.kicker} title={c.name} intro={c.intro}
+    crumbs={[['Home', '/'], ['Collections', '/collections/']]}>
+    <nav class="jump" aria-label="Programs in this collection">
+      {c.programs.map((p) => <a href={`#${p.id}`}>{p.name}</a>)}
+    </nav>
+  </PageHero>
+
+  <section class="sec">
+    <div class="wrap progs">
+      {c.programs.map((p, n) => <Program p={p} group={c.name} n={n + 1} />)}
+      <p class="note">Specifications from the Emsworth Hospitality catalogue 2026. GSM ±5%, dimensions ±3%. Every article can be built to your own dimension, border, colour and branding, confirmed on approved samples before production.</p>
+    </div>
+  </section>
+
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">From the shoot</span>
+        <h2>{c.name}, <em>up close</em></h2>
+      </div>
+      <Gallery items={c.gallery} cap={c.name} cols={4} />
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap nextc">
+      <a class="frame reveal" href={`/collections/${next.slug}/`}>
+        <span class="label">Next collection</span>
+        <h2>{next.name}</h2>
+        <span class="link">Continue</span>
+      </a>
+      <a class="frame reveal" href="/request-a-quote/">
+        <span class="label">Ready to specify?</span>
+        <h2>Request a quote</h2>
+        <span class="link">Send your list</span>
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .jump a { font: 600 12.5px var(--fb); text-decoration: none; padding: 7px 13px; border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); color: var(--ground); }
+  .jump a:hover { background: var(--accent); color: var(--dark); }
+  .progs { display: grid; gap: 26px; }
+  .note { font-size: 13px; color: var(--soft); margin: 10px 0 0; }
+  .nextc { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .nextc a { text-decoration: none; display: grid; gap: 10px; justify-items: start; }
+  .nextc h2 { font-size: clamp(32px, 3.6vw, 50px); }
+  @media (max-width: 700px) { .nextc { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,55 @@
+---
+// Designer Collection, from the main-branch site: jacquard and plain terry by pattern and colour, with filters.
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pic from '../../components/Pic.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Studio from '../../components/Studio.astro';
+import { pick } from '../../data/shoot';
+import { PATTERNS } from '../../data/main';
+const products = PATTERNS.flatMap((p) => p.colourways.map((c) => ({ p, c })));
+const colourNames = [...new Set(products.map(({ c }) => c.name))];
+---
+<Base title="Designer Collection · Emsworth Hospitality" overHero
+  description="Jacquard terry towels in swirl, stripe, check, harlequin and animal patterns, plus plain dyed terry in ten colours — for pools, beach clubs, spas and boutique hotels.">
+  <PageHero image={pick('garden', 'dsc01229')} alt="Rolled Emsworth towels in their belly bands on a stack of jacquard towels, in a garden" focus="50% 55%" kicker="Designer Collection" title="Woven, <em>not printed.</em>"
+    intro="Jacquard terry in five patterns and plain terry in ten colours — for pool decks, beach clubs, spas and boutique rooms."
+    crumbs={[["Home", "/"]]} whole />
+
+  <div class="mb">
+    <section class="shop" data-theme-section="sand">
+      <div class="filters" role="toolbar" aria-label="Filter the collection">
+        <div class="filters__group" data-filter="pattern">
+          <button type="button" class="on" data-v="all">All</button>
+          {PATTERNS.map((p) => <button type="button" data-v={p.slug}>{p.name}</button>)}
+        </div>
+        <div class="filters__group filters__group--colours" data-filter="colour">
+          <button type="button" class="on" data-v="all">All colours</button>
+          {colourNames.map((n) => {
+            const hex = products.find(({ c }) => c.name === n)!.c.hex;
+            return <button type="button" class="dot" data-v={n} style={`--c:${hex}`} aria-label={n} title={n}></button>;
+          })}
+        </div>
+        <p class="filters__count"><b id="shopCount">{products.length}</b> designs</p>
+      </div>
+
+      <div class="pgrid" id="pgrid">
+        {products.map(({ p, c }) => (
+          <a class="pcard" href={`/designer/${p.slug}/?c=${c.key}`} data-pattern={p.slug} data-colour={c.name}>
+            <div class="pcard__media">
+              <Pic src={c.fold} alt={`${p.name} ${c.name} towel, folded`} sizes="(max-width: 820px) 50vw, 25vw" class="pcard__a" />
+              {c.detail && <Pic src={c.detail} alt="" sizes="(max-width: 820px) 50vw, 25vw" class="pcard__b" />}
+            </div>
+            <div class="pcard__meta">
+              <h3>{p.name}</h3>
+              <span><i style={`--c:${c.hex}`}></i>{c.name}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- The towel studio (formerly on the Tailor-made page): build your own towel and add the spec to the quote. -->
+    <Studio />
+  </div>
+</Base>

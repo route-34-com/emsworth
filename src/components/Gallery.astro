@@ -1,0 +1,24 @@
+---
+// Masonry gallery; every tile opens the site lightbox at full size.
+import { Image, getImage } from 'astro:assets';
+
+interface Props { items: ImageMetadata[]; cap: string; cols?: number; alt?: string }
+const { items, cap, cols = 4, alt = cap } = Astro.props;
+const full = await Promise.all(items.map((src) => getImage({ src, width: 1600, format: 'webp' })));
+---
+<div class="gal" style={`--cols:${cols}`} data-gallery>
+  {items.map((src, i) => (
+    <a href={full[i].src} data-full data-cap={cap}>
+      <Image src={src} alt={`${alt}, photo ${i + 1}`} widths={[360, 640]} sizes={`(max-width: 640px) 50vw, (max-width: 1100px) 33vw, ${Math.round(100 / cols)}vw`} loading="lazy" />
+    </a>
+  ))}
+</div>
+
+<style>
+  .gal { column-count: var(--cols); column-gap: 12px; }
+  .gal a { display: block; break-inside: avoid; margin-bottom: 12px; overflow: hidden; background: var(--tint); cursor: zoom-in; }
+  .gal img { width: 100%; height: auto; transition: transform .6s cubic-bezier(.2,.7,.2,1), filter .4s; }
+  .gal a:hover img { transform: scale(1.035); }
+  @media (max-width: 1100px) { .gal { column-count: min(var(--cols), 3); } }
+  @media (max-width: 640px) { .gal { column-count: 2; column-gap: 8px; } .gal a { margin-bottom: 8px; } }
+</style>

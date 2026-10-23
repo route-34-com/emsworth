@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { collections } from '../data/catalogue';
+import { pick } from '../data/shoot';
+---
+<Base title="Request a quote · Emsworth Hospitality"
+  description="Send your specification and quantities. We reply with a sample plan, a lead time and the certificates.">
+  <section class="sec q">
+    <div class="wrap q__grid">
+      <div class="q__side">
+        <span class="orn"></span>
+        <span class="label">Request a quote</span>
+        <h1>Send us the<br/><em>specification.</em></h1>
+        <p class="lead">We will send back a sample, a lead time we intend to keep, and the certificates before you ask for them.</p>
+        <figure class="inset"><Image src={pick('web-banner', 'j8a0886-edit')} alt="Model holding Emsworth towels rolled in branded belly bands" widths={[420, 720]} sizes="(max-width: 900px) 90vw, 36vw" /></figure>
+      </div>
+
+      <div class="frame q__form">
+        <div data-form-wrap>
+          <h2>Your list</h2>
+          <ul class="ql" data-list></ul>
+          <p class="ql__empty" data-empty>Nothing added yet. Browse the <a href="/collections/">collections</a> or <a href="/ranges/">ranges</a> and press “Add to quote”, or describe what you need below.</p>
+
+          <form data-form>
+            <div class="f2">
+              <label>Your name<input name="name" required autocomplete="name" /></label>
+              <label>Property or group<input name="property" required autocomplete="organization" /></label>
+              <label>Email<input name="email" type="email" required autocomplete="email" /></label>
+              <label>Phone<input name="phone" type="tel" autocomplete="tel" /></label>
+              <label>Country<select name="country"><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Qatar</option><option>Oman</option><option>Bahrain</option><option>Kuwait</option><option>Other, Middle East</option><option>Africa</option><option>Other</option></select></label>
+              <label>Rooms or covers<input name="rooms" inputmode="numeric" placeholder="e.g. 240 keys" /></label>
+            </div>
+            <label>Interested in
+              <span class="tick">{collections.map((c) => <label><input type="checkbox" name="collections" value={c.name} />{c.name}</label>)}</span>
+            </label>
+            <label>Quantities, colours, branding and delivery date<textarea name="notes" rows="5" placeholder="e.g. Select bath towels 70×140, 1,200 pcs, optical white, jacquard logo border, delivery March"></textarea></label>
+            <button class="btn" type="submit">Send request</button>
+            <p class="demo">Pitch preview: this form does not send anything yet.</p>
+          </form>
+        </div>
+        <div class="done" data-done hidden>
+          <span class="orn"></span>
+          <h2>Thank you.</h2>
+          <p class="lead">Your request is with our Dubai team. Expect a sample plan and lead time within two working days.</p>
+          <a class="btn btn--line" href="/">Back to home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { readQuote, syncQuote } from '../scripts/site.ts';
+  const list = document.querySelector<HTMLUListElement>('[data-list]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const render = () => {
+    const l = readQuote();
+    list.innerHTML = l.map((x) => `<li><span><b>${x.name}</b><small>${x.group}</small></span>
+      <button type="button" class="add added" data-add="${x.id}" data-name="${x.name}" data-group="${x.group}">Remove</button></li>`).join('');
+    empty.hidden = l.length > 0;
+  };
+  render();
+  // The shared click handler toggles the item; re-render after it runs.
+  list.addEventListener('click', () => setTimeout(() => { render(); syncQuote(); }, 0));
+  document.querySelector<HTMLFormElement>('[data-form]')!.addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.querySelector<HTMLElement>('[data-form-wrap]')!.hidden = true;
+    document.querySelector<HTMLElement>('[data-done]')!.hidden = false;
+    try { localStorage.removeItem('emsworth-quote'); } catch { /* storage blocked */ }
+    syncQuote();
+    scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  .q__grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 6vw, 90px); align-items: start; }
+  .q__side { display: grid; gap: 14px; justify-items: start; position: sticky; top: 120px; }
+  .q h1 { font-size: clamp(46px, 6vw, 84px); }
+  .q figure { margin: 18px 0 0; overflow: hidden; width: 100%; }
+  .q figure img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 50% 30%; }
+  .q__form h2 { font-size: 34px; margin-bottom: 14px; }
+  .ql { list-style: none; margin: 0 0 10px; padding: 0; }
+  .ql li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .ql b { display: block; font: 400 20px var(--fd); color: var(--primary); }
+  .ql small { color: var(--soft); }
+  .ql__empty { color: var(--soft); margin: 0 0 18px; }
+  form { display: grid; gap: 16px; margin-top: 24px; }
+  .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { display: grid; gap: 6px; font: var(--flst) var(--flw) 12px var(--fl); letter-spacing: .12em; text-transform: uppercase; color: var(--lab); }
+  input, select, textarea { font: 400 16px var(--fb); color: var(--ink); background: var(--paper); border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); padding: 12px 13px; border-radius: 0; text-transform: none; letter-spacing: 0; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  .tick { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  .tick label { display: flex; align-items: center; gap: 8px; font: 400 15px var(--fb); color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .tick input { width: 18px; height: 18px; accent-color: var(--primary); }
+  form .btn { justify-self: start; }
+  .demo { font-size: 13px; color: var(--soft); margin: 0; }
+  .done { display: grid; gap: 14px; justify-items: start; }
+  @media (max-width: 900px) { .q__grid, .f2 { grid-template-columns: 1fr; } .q__side { position: static; } }
+</style>

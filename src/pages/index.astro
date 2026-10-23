@@ -1,0 +1,316 @@
+---
+import { Image, getImage } from 'astro:assets';
+import ProductShowcase from '../components/ProductShowcase.jsx';
+import CircularCarousel from '../components/reactbits/CircularCarousel.jsx';
+import Base from '../layouts/Base.astro';
+import Loader from '../components/Loader.astro';
+import Numbers from '../components/Numbers.astro';
+import Reach from '../components/Reach.astro';
+import Weave from '../components/Weave.astro';
+import { collections, ranges, tiers, certifications, process } from '../data/catalogue';
+import { pick, inFolder } from '../data/shoot';
+
+import heroA from '../assets/hero/robe-recline.jpg';
+const signature = pick('web-banner', 'j8a0879-edit');
+const stack = pick('ranges/feather-nest/hand', 'j8a0828-edit');
+const location = pick('outdoor/s1', 'j8a1104-edit');
+// Photos for the spinning ring beside the introduction: people with the product, then the product alone.
+const introRing = await Promise.all(([
+  ['web-banner', 'j8a0879-edit'], ['outdoor/s3', 'j8a1318-edit'], ['ranges/bath-robe', 'j8a0701-edit'], ['web-banner', 'j8a0886-edit'],
+  ['ranges/pool-towel', 'j8a1008-edit'], ['hand-towel', 'j8a0738'], ['garden', 'dsc01229'],
+] as [string, string][]).map(async ([f, n]) => ({ src: (await getImage({ src: pick(f, n), width: 600, format: 'webp' })).src, alt: 'Emsworth towels and linen' })));
+
+// The six ranges for the spinning carousel / accordion (switchable at the side).
+const rangeItems = await Promise.all(ranges.map(async (r) => ({
+  name: r.name, sub: r.tag, href: `/ranges/${r.slug}/`,
+  image: (await getImage({ src: r.lead, width: 900, format: 'webp' })).src,
+  thumb: (await getImage({ src: r.lead, width: 480, format: 'webp' })).src,
+})));
+const patterns = inFolder('product-closeup').filter((_, i) => [0, 7, 12, 16, 20, 26].includes(i));
+const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pick('product-closeup', 'j8a2346'), href: '/designer/#studio' };
+---
+<Base title="Emsworth Hospitality · Hotel textiles, woven for the finest rooms" overHero>
+
+  <div class="mb"><Loader /></div>
+
+  <!-- Hero: one photograph, edge to edge, and one line -->
+  <section class="hero">
+    <Image class="hero__img" src={heroA} alt="Guest reclining in a white Emsworth robe beside a throw embroidered with EMSWORTH"
+      widths={[800, 1400, 2000, 2800]} sizes="100vw" loading="eager" fetchpriority="high" />
+    <h1 class="hero__line"><span class="ln"><span>The Feel</span></span><span class="ln"><em>Comes First</em></span></h1>
+    <a class="hero__cue" href="#colour" aria-label="Scroll down"><span></span></a>
+  </section>
+
+  <!-- Three studio scenes, woven in one after another as you scroll -->
+  <Weave />
+
+  <!-- Introduction -->
+  <section class="sec intro" id="intro">
+    <div class="wrap intro__grid">
+      <div class="reveal">
+        <span class="orn"></span>
+        <span class="label">The Emsworth way</span>
+        <h2>Woven in Tamil Nadu.<br/><em>Delivered across the world.</em></h2>
+        <p class="lead">Emsworth brings the looms of the Christy textile group in Tiruchengode to hotel procurement teams in Dubai and beyond: one partner from specification and sampling to production, shipping and replenishment.</p>
+        <dl class="facts">
+          <div><dt>180 tonnes</dt><dd>woven a month on Itema and Stäubli looms</dd></div>
+          <div><dt>Since 2004</dt><dd>making terry, linen and made-ups</dd></div>
+          <div><dt>4 certifications</dt><dd>ISO 9001, GOTS, OEKO-TEX, SA8000</dd></div>
+        </dl>
+      </div>
+      <div class="intro__ring reveal">
+        <CircularCarousel client:only="react" items={introRing} preset="cylinder" intro="rise" cardWidth={230} aspectRatio={0.78} gap={20}
+          autoplay="drift" speed={9} snap pauseOnHover focusOnClick fadeColor="#f4efe6" depthFade={0.45} innerShade={0.3} cornerRadius={4} />
+      </div>
+    </div>
+  </section>
+
+  <!-- From the main site: the mill in numbers, and where we deliver -->
+  <div class="mb"><Numbers /><Reach /></div>
+
+  <!-- Collections -->
+  <section class="sec sec--ground">
+    <div class="wrap">
+      <div class="sec__head sec__head--center reveal">
+        <span class="orn"></span>
+        <span class="label">The collections</span>
+        <h2>Every textile a guest touches</h2>
+      </div>
+      <div class="cols" data-rows>
+        {[...collections.map((c) => ({ title: c.name, kicker: c.kicker, image: c.image, href: `/collections/${c.slug}/` })), tailor].map((c, i) => (
+          <a class="col reveal" href={c.href} style={`--d:${i * 60}ms`} data-ar={(c.image.width / c.image.height).toFixed(4)}>
+            <div class="col__img inset" style={`aspect-ratio: ${c.image.width} / ${c.image.height}`}><Image src={c.image} alt="" widths={[420, 720, 1100]} sizes="(max-width: 700px) 92vw, 45vw" /></div>
+            <span class="label">{c.kicker}</span>
+            <h3>{c.title}</h3>
+            <span class="link">Explore</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tiers -->
+  <section class="sec sec--primary on-dark tiers">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="label">Bath linen</span>
+        <h2>Choose the tier.<br/><em>Then choose the item.</em></h2>
+        <p>Every tier carries the same ladder (bath sheet, bath towel, hand, face and mat), so a specification compares like for like. Mix by room category.</p>
+      </div>
+      <div class="tiers__grid">
+        {tiers.map((t) => (
+          <a class="tier reveal" href={`/collections/bath/#${t.id}`}>
+            <span class="tier__gsm">{t.gsm}<small> GSM</small></span>
+            <span class="tier__bar" style={`--w:${(t.gsm / 700) * 100}%`}></span>
+            <h3>{t.name}</h3>
+            <p>{t.construction}</p>
+            <p class="tier__for">{t.for}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Ranges -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec__head reveal">
+        <span class="orn"></span>
+        <span class="label">The ranges</span>
+        <h2>Six ranges, <em>photographed in full</em></h2>
+        <p class="lead">From hotel white to safari jacquard. Every range can be dyed to your Pantone and finished with your crest.</p>
+      </div>
+      <ProductShowcase client:only="react" items={rangeItems} modes={["accordion"]} />
+    </div>
+  </section>
+
+  <!-- Tailor-made -->
+  <section class="sec tm">
+    <div class="wrap tm__grid">
+      <div class="tm__mosaic reveal" data-rows data-rows-max="3">
+        {patterns.map((p) => p.src).map((src) => <span data-ar={(src.width / src.height).toFixed(4)} style={`aspect-ratio: ${src.width} / ${src.height}`}><Image src={src} alt="Emsworth jacquard pattern with woven label" widths={[300, 520, 800]} sizes="(max-width: 860px) 50vw, 24vw" /></span>)}
+      </div>
+      <div class="reveal">
+        <span class="orn"></span>
+        <span class="label">Tailor-made</span>
+        <h2>Your crest, <em>woven in.</em></h2>
+        <p class="lead">Every article can be built to your own dimension, border, colour and branding: jacquard logos woven into the border, embroidery, woven labels, Pantone-matched dyes and yarn-dyed stripes.</p>
+        <a class="btn btn--line" href="/designer/#studio">See what we can weave</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- On location -->
+  <section class="loc">
+    <Image src={location} alt="Guest wrapping herself in a white Emsworth bath sheet in dappled sunlight" widths={[700, 1200, 1800]} sizes="100vw" />
+    <div class="loc__q wrap reveal">
+      <p>“A towel is judged in the hand, in the first second. So that is where we start.”</p>
+    </div>
+  </section>
+
+  <!-- Heritage -->
+  <section class="sec sec--dark on-dark her">
+    <div class="wrap">
+      <div class="her__grid">
+        <div class="sec__head reveal">
+          <span class="label">Heritage &amp; manufacturing</span>
+          <h2>One partner, <em>from loom to linen room.</em></h2>
+          <p>Spinning, weaving, dyeing, finishing, cutting, embroidery and packing under direct control, with a zero liquid discharge effluent plant. Coordinated from Dubai, so your team has one regional point of contact.</p>
+          <a class="link" href="/about/">About Emsworth</a>
+        </div>
+        <ul class="certs reveal">{certifications.map(([n, d]) => <li><b>{n}</b><span>{d}</span></li>)}</ul>
+      </div>
+      <ol class="steps">
+        {process.map(([t, d], i) => <li class="reveal"><span>{String(i + 1).padStart(2, '0')}</span><b>{t}</b><p>{d}</p></li>)}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Close -->
+  <section class="sec close">
+    <div class="wrap close__in frame reveal">
+      <span class="orn"></span>
+      <span class="label">UAE · GCC · Middle East · Africa</span>
+      <h2>Send us the specification.</h2>
+      <p class="lead">We will send back a sample, a lead time we intend to keep, and the certificates before you ask for them.</p>
+      <div class="close__ctas"><a class="btn" href="/request-a-quote/">Request a quote</a><a class="btn btn--line" href="/lookbook/">Browse the lookbook</a></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero: the photograph is the page. Only a faint neutral shade where the header and the line sit. */
+  /* As tall as the 3:2 photo on landscape screens, so nothing is cropped (the bottom edge may sit just below the fold). */
+  .hero { position: relative; height: max(100svh, 66.667vw); min-height: 560px; overflow: hidden; background: #2a211b; }
+  .hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 40%; animation: settle 2.4s cubic-bezier(.2,.6,.3,1) both; }
+  .hero::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background:
+    linear-gradient(180deg, rgba(0,0,0,.32), transparent 18%),
+    linear-gradient(90deg, rgba(0,0,0,.38), transparent 42%); }
+  /* On the wall: left of the green vase and above the sofa, scaled with the screen so it never reaches the robe; a soft shadow keeps it legible. */
+  .hero__line { position: absolute; z-index: 2; left: max(var(--gutter), min(calc((100vw - var(--max)) / 2 + var(--gutter)), 5vw)); top: 31%; translate: 0 -50%; margin: 0;
+    font: var(--fdw) clamp(44px, 5vw, 104px)/1.04 var(--fd); color: #fff; text-shadow: 0 2px 28px rgba(20,12,6,.45); letter-spacing: .005em; }
+  .hero__line em { font-style: italic; }
+  /* Each line rises out of its own mask, the second just after the first. */
+  .hero__line .ln { display: block; overflow: hidden; padding: 0 .12em .1em 0; margin-bottom: -.1em; }
+  .hero__line .ln > * { display: inline-block; animation: lineUp 1.2s cubic-bezier(.19,1,.22,1) both; animation-delay: .15s; }
+  .hero__line .ln + .ln > * { animation-delay: .32s; }
+  /* Held until the loader has lifted (main-port.js adds .is-ready), so the line rises in view. */
+  :global(html:not(.is-ready)) .hero__line .ln > * { animation-play-state: paused; }
+
+  @keyframes lineUp { from { transform: translateY(110%); } to { transform: none; } }
+  :global([data-type='mulish']) .hero__line { font-weight: 900; letter-spacing: -.05em; line-height: .92; }
+  :global([data-type='mulish']) .hero__line em { color: color-mix(in srgb, var(--accent) 45%, #fff); }
+  @keyframes settle { from { transform: scale(1.04); } to { transform: none; } }
+  .hero__cue { position: absolute; z-index: 2; right: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); bottom: clamp(40px, 7vh, 76px); width: 1px; height: 48px; background: rgba(255,255,255,.35); overflow: hidden; }
+  .hero__cue span { position: absolute; inset: 0; background: #fff; animation: drip 2.4s ease-in-out infinite; transform-origin: top; }
+  @keyframes drip { 0% { transform: scaleY(0); } 55% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hero__img, .hero__line .ln > *, .hero__cue span { animation: none; } }
+
+
+  /* Intro */
+  .intro { padding-bottom: clamp(48px, 6vw, 80px); }
+  .intro + .sec { padding-top: clamp(48px, 6vw, 80px); }
+  .intro__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(36px, 6vw, 100px); align-items: center; }
+  .intro h2 { font-size: clamp(38px, 4.8vw, 66px); margin: 12px 0 22px; }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 36px 0 0; border-top: 4px double var(--line); padding-top: 22px; }
+  .facts dt { font: 400 clamp(22px, 2.2vw, 30px)/1.1 var(--fd); color: var(--primary); }
+  .facts dd { margin: 6px 0 0; font-size: 14px; color: var(--soft); }
+  /* Seven photos, and the ring runs a little past its column into the margin so the cards stay large. */
+  .intro__ring { height: clamp(440px, 40vw, 600px); width: calc(100% + 9vw); margin-right: -9vw; }
+  @media (max-width: 860px) { .intro__ring { width: 100%; margin: 0; } }
+  .intro__ring :global(img) { object-position: 50% 15%; }
+  .intro__pics { position: relative; padding-bottom: 22%; }
+  .intro__pics figure { margin: 0; overflow: hidden; }
+  .intro__a img { display: block; width: 100%; height: auto; }
+  .intro__b { position: absolute; width: 38%; left: -6%; bottom: 0; border: 8px solid var(--paper); box-shadow: 0 30px 60px -30px rgba(0,0,0,.45); }
+  .intro__b img { display: block; width: 100%; height: auto; }
+
+  /* Collections */
+  /* Collections, ranges and patterns: each photo whole, in rows the script scales to fill the width (scripts/justify.ts). */
+  .cols { display: flex; flex-wrap: wrap; gap: clamp(30px, 3vw, 44px) clamp(18px, 2.4vw, 34px); }
+  .col { display: grid; gap: 8px; justify-items: start; align-content: start; width: calc(33.333% - 23px); text-decoration: none; transition-delay: var(--d); }
+  .col__img { width: 100%; overflow: hidden; margin-bottom: 10px; }
+  .col__img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
+  .col:hover .col__img img { transform: scale(1.04); }
+  .col h3 { font-size: clamp(28px, 2.6vw, 38px); }
+  .col .link { margin-top: 6px; }
+
+  /* Tiers */
+  .tiers__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: color-mix(in srgb, var(--accent) 35%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+  .tier { background: var(--primary); padding: clamp(22px, 2.6vw, 36px); text-decoration: none; display: grid; gap: 10px; align-content: start; transition: background .3s; }
+  .tier:hover { background: color-mix(in srgb, var(--primary) 85%, var(--accent)); }
+  .tier__gsm { font: 400 clamp(46px, 5vw, 72px)/1 var(--fd); color: var(--accent); }
+  .tier__gsm small { font-size: .3em; letter-spacing: .14em; }
+  .tier__bar { height: 3px; background: color-mix(in srgb, var(--ground) 14%, transparent); position: relative; margin: 6px 0 10px; }
+  .tier__bar::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--w); background: var(--accent); }
+  .tier h3 { font-size: 30px; }
+  .tier p { margin: 0; font-size: 15px; }
+  .tier__for { opacity: .75; }
+
+  /* Ranges */
+
+
+  /* Tailor-made */
+  .tm__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 6vw, 100px); align-items: center; }
+  .tm h2 { font-size: clamp(38px, 4.8vw, 66px); margin: 12px 0 20px; }
+  .tm .lead { margin-bottom: 28px; }
+  .tm__mosaic { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tm__mosaic > span { display: block; width: calc(33.333% - 6px); overflow: hidden; }
+  .tm__mosaic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  /* On location */
+  .loc { position: relative; height: min(88svh, 860px); overflow: hidden; color: var(--ground); }
+  .loc img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; }
+  .loc::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--dark) 80%, transparent), transparent 55%); }
+  .loc__q { position: absolute; z-index: 1; left: 0; right: 0; bottom: clamp(40px, 8vw, 90px); }
+  .loc__q p { margin: 0; max-width: 820px; font: italic 400 clamp(28px, 3.6vw, 52px)/1.15 var(--fd); }
+
+  /* Heritage */
+  .her__grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(30px, 6vw, 90px); align-items: start; }
+  .her .sec__head p { margin: 0 0 8px; }
+  .certs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .certs li { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .certs b { font: 400 22px var(--fd); color: var(--ground); }
+  .certs span { font-size: 14px; }
+  .steps { list-style: none; margin: clamp(40px, 6vw, 80px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; counter-reset: s; }
+  .steps li { border-top: 2px solid var(--accent); padding-top: 16px; }
+  .steps span { font: 400 30px var(--fd); color: var(--accent); }
+  .steps b { display: block; font: 400 22px var(--fd); color: var(--ground); margin: 6px 0; }
+  .steps p { margin: 0; font-size: 14px; }
+
+  /* Close */
+  .close__in { text-align: center; display: grid; justify-items: center; gap: 14px; padding: clamp(40px, 6vw, 80px); }
+  .close h2 { font-size: clamp(40px, 5.4vw, 76px); }
+  .close .lead { text-align: center; margin: 0 auto; }
+  .close__ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 12px; }
+
+  @media (max-width: 1020px) {
+    .steps { grid-template-columns: repeat(3, 1fr); row-gap: 30px; }
+    .tiers__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 860px) {
+    .intro__grid, .tm__grid, .her__grid { grid-template-columns: 1fr; }
+    .intro__pics { margin-top: 10px; }
+  }
+  @media (max-width: 600px) {
+    .facts { grid-template-columns: 1fr; gap: 14px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .tiers__grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 760px) {
+    .hero__img { object-position: 76% 40%; }
+    .hero::before { background: linear-gradient(180deg, rgba(0,0,0,.32), transparent 16%); }
+    .hero { height: 100svh; }
+    .hero__line { top: 50%; font-size: 42px; color: #1c1a18; text-shadow: 0 0 24px rgba(255,255,255,.6); } /* on a phone the line sits over the white robe */
+    .hero__cue { display: none; }
+  }
+</style>
+
+<script>
+  import { justifyAll } from '../scripts/justify';
+  // Rows of whole photographs: up to three to a row on desktop, two on a tablet, one on a phone (patterns stay three).
+  justifyAll('.cols[data-rows]', { target: () => (innerWidth > 1100 ? 480 : 380), maxPerRow: () => (innerWidth > 860 ? 3 : innerWidth > 600 ? 2 : 1) });
+  justifyAll('.tm__mosaic[data-rows]', { target: () => (innerWidth > 860 ? 200 : 170), maxPerRow: () => 3 });
+</script>
+
