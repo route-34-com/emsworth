@@ -81,7 +81,8 @@ const DriftWall = ({
     const unit = tileHeight + gap;
     return columnItems.map(col => {
       const copyHeight = Math.max(unit, col.length * unit);
-      const copies = Math.max(2, Math.ceil((containerHeight * 1.6) / copyHeight) + 1);
+      // One extra copy: with few, tall columns the loop otherwise ran out and left a blank slot near the bottom.
+      const copies = Math.max(3, Math.ceil((containerHeight * 1.6) / copyHeight) + 2);
       return { copyHeight, copies };
     });
   }, [columnItems, tileHeight, gap, containerHeight]);

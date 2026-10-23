@@ -11,7 +11,6 @@ const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port')
 ---
 <section class:list={['ph', wholeCls]} style={whole ? `--ar: ${ar.toFixed(4)}` : undefined}>
   <div class="ph__img inset">
-    {whole && ar >= 1 && typeof image !== 'string' && <Image class="ph__fill" src={image} alt="" widths={[640]} sizes="40vw" aria-hidden="true" />}
     {typeof image === 'string'
       ? <img src={`/images/${image}-1600.webp`} srcset={[800, 1600, 2400].map((w) => `/images/${image}-${w}.webp ${w}w`).join(', ')} sizes="100vw" alt={alt} loading="eager" fetchpriority="high" style={`object-position:${focus}`} />
       : <Image src={image} alt={alt} widths={[640, 1100, 1700]} sizes="100vw" loading="eager" fetchpriority="high" style={`object-position:${focus}`} />}
@@ -65,9 +64,8 @@ const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port')
 
   /* Whole photo, landscape: full width, as tall as the photo; words sit in the first screen. */
   :global(html) .ph--land { display: grid; grid-template-columns: 1fr; min-height: 0; height: max(100svh, 560px); background: var(--dark); }
-  /* The photo is shown whole inside one screen; a blurred copy of it fills any space at the sides. */
-  :global(html) .ph--land .ph__img img:not(.ph__fill) { object-fit: contain; z-index: 0; }
-  :global(html) .ph--land .ph__fill { object-fit: cover; filter: blur(28px) saturate(1.1); transform: scale(1.15); }
+  /* The photo covers the full width of one screen; `focus` keeps faces in frame when the top or bottom is trimmed. */
+  :global(html) .ph--land .ph__img img { object-fit: cover; }
   :global(html) .ph--land .ph__img { position: absolute; inset: 0; grid-column: auto; grid-row: auto; min-height: 0; }
   :global(html) .ph--land .ph__img::before { background:
     linear-gradient(180deg, color-mix(in srgb, var(--dark) 60%, transparent), transparent 22%),
@@ -86,7 +84,6 @@ const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port')
     :global(html) .ph--port .ph__panel { grid-row: 2; padding: 32px var(--gutter) 40px; }
     :global(html) .ph--land { height: auto; }
     :global(html) .ph--land .ph__img { position: relative; aspect-ratio: var(--ar); grid-row: 1; }
-    :global(html) .ph--land .ph__fill { display: none; }
     :global(html) .ph--land .ph__panel { grid-row: 2; padding: 28px var(--gutter) 40px; background: var(--dark); }
     :global(html) .ph--land .ph__img::before { background: none; }
   }

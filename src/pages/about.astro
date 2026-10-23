@@ -9,7 +9,7 @@ import { pick, inFolder } from '../data/shoot';
 
 const outdoor = inFolder('outdoor', true).map((p) => p.src);
 const banners = inFolder('web-banner').map((p) => p.src);
-const wall = await Promise.all([...outdoor, ...banners].map(async (src) => ({ image: (await getImage({ src, width: 520, format: 'webp' })).src, title: '' })));
+const wall = await Promise.all([...new Set([...outdoor, ...banners])].map(async (src) => ({ image: (await getImage({ src, width: 520, format: 'webp' })).src, title: '' })));
 const facilities = [
   ['Weaving', 'High-speed warping, Itema looms and Stäubli jacquard, producing around 180 tonnes a month.'],
   ['Dyeing', 'A modern soft-flow dyeing unit, with our own share in a state-sponsored common effluent treatment plant for zero liquid discharge.'],
@@ -72,15 +72,21 @@ const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced resid
     <div class="wrap">
       <div class="sec__head reveal"><span class="label">On location &amp; campaign</span><h2>Emsworth <em>in the sun</em></h2></div>
     </div>
-    <div class="drift__wall"><DriftWall client:only="react" items={wall} columns={5} tileWidth={260} tileHeight={300} gap={18} radius={4}
-      tilt={14} turn={-12} speed={30} variance={0.4} parallax={0.5} lift={40} fade={0.2} dim={0.92} overlayColor="#141c30" pauseOnHover /></div>
+    <div class="drift__wall"><DriftWall client:only="react" items={wall} columns={7} tileWidth={250} tileHeight={300} gap={14} radius={3}
+      tilt={14} turn={-12} speed={24} variance={0.4} parallax={0} lift={0} fade={0.12} dim={0.96} overlayColor="#141c30" /></div>
   </section>
 </Base>
 
 <style>
-  .drift { padding-bottom: 0; }
-  .drift__wall { height: min(92svh, 860px); margin-top: 8px; }
+  /* Heading and wall together fill exactly one screen below the header; the photos just drift, nothing to hover or click. */
+  .sec.drift { display: flex; flex-direction: column; height: calc(100svh - 84px); min-height: 520px; padding-top: clamp(24px, 3.5vh, 44px); padding-bottom: 0; }
+  .drift > .wrap { width: 100%; }
+  .drift .sec__head { margin-bottom: 0; }
+  .drift__wall { flex: 1; min-height: 0; margin-top: 12px; pointer-events: none; }
   .drift__wall :global(img) { object-position: 50% 20%; }
+  /* Safari: only the wall itself is 3D. Giving every tile its own 3D layer (~200 of them) made Safari drop photos. */
+  .drift__wall :global(.drift-wall__col), .drift__wall :global(.drift-wall__track), .drift__wall :global(.drift-wall__tile) { transform-style: flat; }
+  .drift__wall :global(.drift-wall__inner) { transform: none; }
   .drift__wall :global(.drift-wall__overlay) { opacity: .1; }
   .drift__wall :global(.drift-wall__inner) { background: var(--tint); } /* tiles crop near the top so faces stay in */
   .two { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 6vw, 90px); }

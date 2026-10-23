@@ -1,11 +1,11 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import { getImage } from 'astro:assets';
 import { collections } from '../../data/catalogue';
 import { CATEGORIES, tagged } from '../../data/colours';
 import ProductShowcase from '../../components/ProductShowcase.jsx';
+import StackCards from '../../components/StackCards.jsx';
 import { pick } from '../../data/shoot';
 
 // The products for the showcase: each with its lookbook cover, photo count and lookbook link.
@@ -14,29 +14,23 @@ const products = await Promise.all(CATEGORIES.map(async (c) => ({
   image: (await getImage({ src: pick(...c.cover), width: 900, format: 'webp' })).src,
   thumb: (await getImage({ src: pick(...c.cover), width: 480, format: 'webp' })).src, // small copies keep the orbit smooth
 })));
+// The five collections as cards that pin and stack while you scroll.
+const widths = [600, 1000, 1500];
+const cards = await Promise.all(collections.map(async (c) => {
+  const imgs = await Promise.all(widths.map((width) => getImage({ src: c.image, width, format: 'webp' })));
+  return { href: `/collections/${c.slug}/`, kicker: c.kicker, title: c.name, text: c.intro, meta: c.programs.map((p) => p.name).join(' · '),
+    cta: 'View specifications', ar: (c.image.width / c.image.height).toFixed(4), alt: c.alt,
+    src: imgs[1].src, srcset: imgs.map((x, i) => `${x.src} ${widths[i]}w`).join(', ') };
+}));
 ---
 <Base title="Collections · Emsworth Hospitality" overHero
   description="Bath, bed, table, pool and spa linen, robes and slippers for hotels: catalogue specifications, sizes, MOQs and lead times.">
-  <PageHero image={pick('outdoor/s3', 'j8a1318-edit')} alt="Guest in a green head towel holding a banded Emsworth towel, beside rolled towels on a lounge chair" focus="50% 30%" whole
+  <PageHero image={pick('outdoor/s3', 'j8a1318-edit')} alt="Guest in a green head towel holding a banded Emsworth towel, beside rolled towels on a lounge chair" focus="50% 12%" whole
     kicker="The collections" title="Every textile<br/><em>a guest touches.</em>"
     intro="Five collections with full catalogue specifications. Every article can be built to your own dimension, border, colour and branding." />
 
   <section class="sec">
-    <div class="wrap list">
-      {collections.map((c, i) => (
-        <a class:list={['row reveal', { 'row--flip': i % 2 }]} href={`/collections/${c.slug}/`}>
-          <div class="row__img inset"><Image src={c.image} alt={c.alt} widths={[520, 900]} sizes="(max-width: 820px) 92vw, 45vw" /></div>
-          <div class="row__txt">
-            <span class="row__n">{String(i + 1).padStart(2, '0')}</span>
-            <span class="label">{c.kicker}</span>
-            <h2>{c.name}</h2>
-            <p>{c.intro}</p>
-            <p class="row__progs">{c.programs.map((p) => p.name).join(' · ')}</p>
-            <span class="link">View specifications</span>
-          </div>
-        </a>
-      ))}
-    </div>
+    <div class="wrap"><StackCards client:load items={cards} gap={16} /></div>
   </section>
 
   <!-- Every product we photographed (not only the towel ranges), in one of three displays the visitor can switch between. -->
@@ -52,18 +46,4 @@ const products = await Promise.all(CATEGORIES.map(async (c) => ({
   </section>
 </Base>
 
-<style>
-  .list { display: grid; gap: clamp(60px, 9vw, 120px); }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 90px); align-items: center; text-decoration: none; }
-  .row--flip .row__img { order: 2; }
-  .row__img { overflow: hidden; }
-  .row__img img { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
-  .row:hover .row__img img { transform: scale(1.03); }
-  .row__txt { display: grid; gap: 12px; justify-items: start; }
-  .row__n { font: 400 54px/1 var(--fd); color: var(--accent); }
-  .row h2 { font-size: clamp(40px, 4.6vw, 64px); }
-  .row p { margin: 0; color: var(--soft); max-width: 48ch; }
-  .row__progs { font: var(--flst) 14px var(--fl); color: var(--lab) !important; }
-  @media (max-width: 820px) { .row { grid-template-columns: 1fr; } .row--flip .row__img { order: 0; } }
-</style>
 
