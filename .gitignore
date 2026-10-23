@@ -1,0 +1,9 @@
+# Client source material (kept locally, not part of the site)
+*.pdf
+WhatsApp*
+
+# Tooling / OS
+.playwright-mcp/
+.DS_Store
+Thumbs.db
+desktop.ini
