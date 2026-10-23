@@ -15,7 +15,7 @@ const [first, ...rest] = cat.name.split(' ');
 const title = rest.length ? `${first} <em>${rest.join(' ')}</em>` : `<em>${first}</em>`;
 ---
 <Base title={cat.name} description={`${cat.name} — ${cat.short} Emsworth Hospitality, Dubai.`}>
-  <PageHero kicker={cat.kicker} title={title} lede={cat.short} img={cat.hero} alt={cat.name} crumbs={[{ href: '/hospitality/', label: 'Hospitality' }]} />
+  <PageHero kicker={cat.kicker} title={title} lede={cat.short} img={cat.hero} alt={cat.name} pos={cat.hero.startsWith('lifestyle/') ? '50% 22%' : '50% 50%'} crumbs={[{ href: '/hospitality/', label: 'Hospitality' }]} />
 
   <section class="detail" data-theme-section="sand">
     <p class="detail__intro split">{cat.intro}</p>

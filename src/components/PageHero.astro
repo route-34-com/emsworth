@@ -1,10 +1,10 @@
 ---
 import Pic from './Pic.astro';
-interface Props { kicker: string; title: string; lede?: string; img: string; alt: string; crumbs?: { href: string; label: string }[]; }
-const { kicker, title, lede, img, alt, crumbs = [] } = Astro.props;
+interface Props { kicker: string; title: string; lede?: string; img: string; alt: string; pos?: string; crumbs?: { href: string; label: string }[]; }
+const { kicker, title, lede, img, alt, pos = '50% 50%', crumbs = [] } = Astro.props;
 ---
 <section class="phero" data-theme-section="teal">
-  <div class="phero__media"><Pic src={img} alt={alt} sizes="100vw" eager /></div>
+  <div class="phero__media" style={`--pos:${pos}`}><Pic src={img} alt={alt} sizes="100vw" eager /></div>
   <div class="phero__shade"></div>
   <div class="phero__content">
     {crumbs.length > 0 && (

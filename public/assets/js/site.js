@@ -130,7 +130,7 @@
     }
     if ($('.phero')) {
       gsap.timeline()
-        .fromTo('.phero__media img', { scale: 1.25 }, { scale: 1.05, duration: 2.2, ease: 'expo.out' }, 0)
+        .fromTo('.phero__media img', { scale: 1.12 }, { scale: 1, duration: 2.4, ease: 'power3.out' }, 0)
         .from(['.crumbs', '.phero__kicker', '.phero__title', '.phero__lede'], { y: 50, autoAlpha: 0, duration: 1.2, ease: 'expo.out', stagger: 0.09 }, 0.15);
     }
     if ($('.pdp')) {
@@ -215,7 +215,7 @@
 
   /* ---------- page hero parallax ---------- */
   if ($('.phero')) {
-    gsap.to('.phero__media', { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '.phero', start: 'top top', end: 'bottom top', scrub: 1.2 } });
+    gsap.to('.phero__media', { yPercent: 5, ease: 'none', scrollTrigger: { trigger: '.phero', start: 'top top', end: 'bottom top', scrub: 1.2 } });
     gsap.to('.phero__content', { yPercent: -25, opacity: 0.2, ease: 'none', scrollTrigger: { trigger: '.phero', start: 'top top', end: 'bottom top', scrub: 1.2 } });
   }
 
