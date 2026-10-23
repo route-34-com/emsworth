@@ -1,6 +1,5 @@
-# Client source material (kept locally, not part of the site)
-*.pdf
-WhatsApp*
+# Client source material (PDFs, raw photos, videos) — kept locally only
+source-material/
 
 # Build / dependencies
 node_modules/
@@ -12,3 +11,5 @@ dist/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+.vercel

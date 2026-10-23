@@ -1,0 +1,5 @@
+source-material
+node_modules
+dist
+.astro
+.playwright-mcp
