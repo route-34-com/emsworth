@@ -1,0 +1,17 @@
+---
+import { CATEGORIES } from '../data/site';
+interface Props { title?: string; exclude?: string; }
+const { title, exclude } = Astro.props;
+const items = CATEGORIES.filter((c) => c.slug !== exclude);
+---
+<section class="portfolio" id="portfolio" data-theme-section="sand">
+  <div class="portfolio__head">
+    {title ? <h2 class="split" set:html={title} /> : <h2 class="split">One partner for the <em>whole room.</em></h2>}
+  </div>
+  <ul class="plist" id="plist">
+    {items.map((c) => (
+      <li data-img={`/images/${c.card ?? c.hero}-800.webp`}><a href={`/hospitality/${c.slug}/`}><h3>{c.name}</h3><p>{c.short}</p><i>→</i></a></li>
+    ))}
+  </ul>
+  <div class="plist__float" id="plistFloat" aria-hidden="true"><img alt=""></div>
+</section>

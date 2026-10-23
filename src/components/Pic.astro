@@ -1,0 +1,23 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  sizes?: string;
+  class?: string;
+  eager?: boolean;
+  widths?: number[];
+}
+const { src, alt, sizes = '(max-width: 820px) 100vw, 50vw', class: cls, eager = false, widths } = Astro.props;
+const big = src.startsWith('banner/') ? [800, 1600, 2400] : src.startsWith('lifestyle/') ? [800, 1600, 2200] : src.includes('-face') ? [800, 1400] : [800, 1600];
+const ws = widths ?? big;
+const url = (w: number) => `/images/${src}-${w}.webp`;
+---
+<img
+  class={cls}
+  src={url(ws[0])}
+  srcset={ws.map((w) => `${url(w)} ${w}w`).join(', ')}
+  sizes={sizes}
+  alt={alt}
+  loading={eager ? 'eager' : 'lazy'}
+  decoding="async"
+/>

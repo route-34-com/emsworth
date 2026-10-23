@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Studio from '../components/Studio.astro';
+import Pic from '../components/Pic.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+const options = [
+  { group: 'Borders', items: ['Dobby band, 5 / 8 / 12 cm', 'Satin or twill band', 'Cam border', 'Custom jacquard border to your artwork', 'Checker or diamond dobby'] },
+  { group: 'Weaves', items: ['Zero-twist terry', 'Double loop terry', 'Ribbed / cord terry', 'Waffle / honeycomb', 'Velour face'] },
+  { group: 'Branding', items: ['Jacquard-woven logo', 'Embroidery, up to six thread colours', 'Woven or printed care labels', 'Screen / heat-transfer print'] },
+  { group: 'Colour', items: ['Optical white, chlorine-stable', 'Piece-dyed to Pantone', 'Yarn-dyed stripes and checks'] },
+  { group: 'Finishes', items: ['Antimicrobial (Intertek verified)', 'Fragrance finish', 'Easy-care for polycotton', 'Fire retardant to BS 7175 / NFPA 701'] },
+  { group: 'Packing', items: ['Individual poly bag with header card', 'Printed paper belly band', 'Custom printed export cartons'] },
+];
+---
+<Base title="Tailor-Made" description="Build towels and linen to your specification — border, weave, colour, branding, finish and packing. Try the Emsworth towel studio.">
+  <PageHero kicker="Tailor-Made" title="Built to <em>your specification.</em>" lede="Border, weave, hem, colour, branding, finish and packing — every article can be made for your property." img="hospitality/terry-03" alt="Emsworth logo embroidered on white terry" />
+  <Studio />
+
+  <section class="options" data-theme-section="sand">
+    <h2 class="split">Everything you can <em>change.</em></h2>
+    <div class="options__grid">
+      {options.map((o) => (
+        <article class="opt"><h3>{o.group}</h3><ul>{o.items.map((i) => <li>{i}</li>)}</ul></article>
+      ))}
+    </div>
+  </section>
+
+  <section class="feature" data-theme-section="sand">
+    <div class="feature__media"><Pic src="hospitality/terry-36" alt="Navy embroidery on a white club towel" sizes="(max-width: 820px) 100vw, 50vw" /></div>
+    <div class="feature__copy">
+      <h2 class="split">Woven or <em>embroidered?</em></h2>
+      <p>A jacquard-woven logo is structural — it cannot peel, crack or wash away, and lasts the full life of the towel. Embroidery is faster and reproduces fine artwork more faithfully.</p>
+      <p>For a flagship property we recommend jacquard on bath towels and embroidery on robes, where guests look closely.</p>
+    </div>
+  </section>
+
+  <section class="feature feature--rev" data-theme-section="sand">
+    <div class="feature__media"><Pic src="hospitality/guest-08" alt="Emsworth branded packaging, belly band, swing tag and thank-you card" sizes="(max-width: 820px) 100vw, 50vw" /></div>
+    <div class="feature__copy">
+      <h2 class="split">Presentation <em>included.</em></h2>
+      <p>Belly bands, swing tags, care labels and cards — printed to your brand and packed per room or per department, so housekeeping can roll it out without re-sorting.</p>
+    </div>
+  </section>
+
+  <CtaBand title="Send us <em>the brief.</em>" text="Artwork, Pantone references and quantities — we’ll return a sample and a lead time." href="/contact/" label="Request samples" />
+</Base>

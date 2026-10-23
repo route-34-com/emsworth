@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pic from '../../components/Pic.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { CATEGORIES } from '../../data/site';
+---
+<Base title="Hospitality" description="Bath linen, bed linen, robes, slippers, pool towels, table linen and uniforms for hotels, resorts and serviced residences across the GCC, Middle East and Africa.">
+  <PageHero kicker="Hospitality" title="Everything the room <em>touches.</em>" lede="Contract textiles for hotels, resorts, serviced residences and F&B — specified, sampled and delivered from one Dubai partner." img="banner/banner-4" alt="Guest holding a stack of Emsworth towels in different colours" />
+
+  <section class="intro2" data-theme-section="sand">
+    <p class="intro2__lead split">One specification, one sample room, one point of contact — from the <em>first lab dip</em> to the last carton on site.</p>
+    <div class="intro2__facts">
+      <div><b>6</b><span>Product categories</span></div>
+      <div><b>Pantone</b><span>Colour matched to reference</span></div>
+      <div><b>Your logo</b><span>Woven, embroidered or printed</span></div>
+    </div>
+  </section>
+
+  <section class="catgrid" data-theme-section="sand">
+    {CATEGORIES.map((c, i) => (
+      <a class={`catcard catcard--${i % 3}`} href={`/hospitality/${c.slug}/`}>
+        <div class="catcard__media"><Pic src={c.card ?? c.hero} alt={c.name} sizes="(max-width: 820px) 100vw, 50vw" /></div>
+        <div class="catcard__body">
+          <span class="catcard__kicker">{c.kicker}</span>
+          <h2>{c.name}</h2>
+          <p>{c.short}</p>
+          <span class="catcard__go">Explore <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <CtaBand title="Tell us about <em>the project.</em>" text="Rooms, quantities and timeline — we’ll come back with a proposal, samples and a lead time we intend to keep." href="/contact/" label="Start a project" />
+</Base>

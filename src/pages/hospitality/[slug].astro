@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Tiers from '../../components/Tiers.astro';
+import Gallery from '../../components/Gallery.astro';
+import Portfolio from '../../components/Portfolio.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { CATEGORIES, type Category } from '../../data/site';
+
+export function getStaticPaths() {
+  return CATEGORIES.map((c) => ({ params: { slug: c.slug }, props: { cat: c } }));
+}
+const { cat } = Astro.props as { cat: Category };
+const [first, ...rest] = cat.name.split(' ');
+const title = rest.length ? `${first} <em>${rest.join(' ')}</em>` : `<em>${first}</em>`;
+---
+<Base title={cat.name} description={`${cat.name} — ${cat.short} Emsworth Hospitality, Dubai.`}>
+  <PageHero kicker={cat.kicker} title={title} lede={cat.short} img={cat.hero} alt={cat.name} crumbs={[{ href: '/hospitality/', label: 'Hospitality' }]} />
+
+  <section class="detail" data-theme-section="sand">
+    <p class="detail__intro split">{cat.intro}</p>
+    <div class="detail__grid">
+      <div class="hl">
+        {cat.highlights.map((h) => (
+          <article class="hl__item"><h3>{h.title}</h3><p>{h.text}</p></article>
+        ))}
+      </div>
+      {cat.specs && (
+        <dl class="specs">
+          {cat.specs.map((s) => <div class="specs__row"><dt>{s.label}</dt><dd>{s.value}</dd></div>)}
+        </dl>
+      )}
+    </div>
+  </section>
+
+  {cat.tiers && <Tiers />}
+  <Gallery items={cat.gallery} title="In <em>detail.</em>" />
+  <CtaBand title={`Sample our <em>${cat.name.toLowerCase()}.</em>`} text="Send rooms, quantities and timeline — we’ll come back with samples, a proposal and certificates." href={`/contact/?c=${encodeURIComponent(cat.name)}`} label="Request samples" />
+  <Portfolio title="More for <em>the property.</em>" exclude={cat.slug} />
+</Base>

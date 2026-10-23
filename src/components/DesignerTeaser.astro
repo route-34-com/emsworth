@@ -1,0 +1,22 @@
+---
+import Pic from './Pic.astro';
+const tiles = [
+  ['swirl', 'onyx', 'Swirl', 'Onyx'], ['harlequin', 'terracotta', 'Harlequin', 'Terracotta'], ['swirl', 'sage', 'Swirl', 'Sage'], ['swirl', 'navy', 'Swirl', 'Navy'],
+  ['harlequin', 'onyx', 'Harlequin', 'Onyx'], ['check', 'sage', 'Check', 'Sage'], ['harlequin', 'navy', 'Harlequin', 'Navy'], ['animal', 'leopard', 'Animal', 'Leopard'],
+];
+---
+<section class="library" data-theme-section="sand">
+  <div class="library__head">
+    <h2 class="split">Woven, <em>not printed.</em></h2>
+    <p>Jacquard patterns are structural — they can’t fade, crack or wash out. Explore the Designer Collection, or send us your own artwork.</p>
+  </div>
+  <div class="library__grid">
+    {tiles.map(([p, c, pn, cn]) => (
+      <a class="ltile" href={`/collection/${p}/?c=${c}`}>
+        <Pic src={`collection/${p}-${c}-detail`} alt={`${cn} ${pn} jacquard towel`} sizes="(max-width: 820px) 50vw, 25vw" />
+        <figcaption>{pn} <span>{cn}</span></figcaption>
+      </a>
+    ))}
+  </div>
+  <div class="center-cta"><a href="/collection/" class="btn btn--teal magnetic"><span>View the Designer Collection</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</section>

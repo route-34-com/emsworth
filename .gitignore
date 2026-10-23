@@ -2,6 +2,11 @@
 *.pdf
 WhatsApp*
 
+# Build / dependencies
+node_modules/
+dist/
+.astro/
+
 # Tooling / OS
 .playwright-mcp/
 .DS_Store

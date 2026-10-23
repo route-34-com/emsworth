@@ -1,0 +1,27 @@
+---
+import Pic from './Pic.astro';
+import { TIERS } from '../data/site';
+---
+<section class="collections" id="tiers" data-theme-section="sand">
+  <div class="collections__pin">
+    <div class="collections__intro">
+      <h2 class="split">Choose the tier.<br><em>Then the towel.</em></h2>
+      <p>Every collection carries the same item ladder — bath sheet, bath towel, hand towel, face towel and bath mat — so specifications compare like-for-like across budgets. Mix tiers by room category.</p>
+      <div class="collections__progress"><span id="colProgress"></span></div>
+    </div>
+    <div class="collections__track" id="colTrack">
+      {TIERS.map((c) => (
+        <article class="ccard">
+          <div class="ccard__swatch"><Pic src={c.img} alt={`${c.name} towel`} sizes="380px" />{c.tag && <span class="ccard__tag">{c.tag}</span>}</div>
+          <div class="ccard__body">
+            <h3>{c.name}</h3>
+            <p class="ccard__gsm">{c.gsm}</p>
+            <dl><dt>Fibre</dt><dd>{c.comp}</dd><dt>Yarn</dt><dd>{c.yarn}</dd><dt>Build</dt><dd>{c.cons}</dd></dl>
+            <div class="ccard__bar" style={`--v:${c.v}`}><i></i></div>
+            <p class="ccard__for">{c.for}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

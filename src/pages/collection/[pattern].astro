@@ -1,0 +1,72 @@
+---
+import Base from '../../layouts/Base.astro';
+import Pic from '../../components/Pic.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { PATTERNS, type Pattern } from '../../data/site';
+
+export function getStaticPaths() {
+  return PATTERNS.map((p) => ({ params: { pattern: p.slug }, props: { pat: p } }));
+}
+const { pat } = Astro.props as { pat: Pattern };
+const first = pat.colourways[0];
+const views = (c: typeof first) =>
+  [
+    { key: 'fold', label: 'Folded', src: c.fold },
+    c.set && { key: 'set', label: 'Set', src: c.set },
+    c.detail && { key: 'detail', label: 'Close-up', src: c.detail },
+    c.face && { key: 'face', label: 'Face towel', src: c.face },
+    c.slipper && { key: 'slipper', label: 'Slippers', src: c.slipper },
+  ].filter(Boolean) as { key: string; label: string; src: string }[];
+const data = pat.colourways.map((c) => ({ key: c.key, name: c.name, views: views(c) }));
+const others = PATTERNS.filter((p) => p.slug !== pat.slug);
+---
+<Base title={`${pat.name} — Designer Collection`} description={`${pat.name}: ${pat.intro}`} theme="sand">
+  <section class="pdp" data-theme-section="sand">
+    <div class="pdp__stage">
+      <div class="pdp__main" id="pdpMain">
+        <Pic src={first.fold} alt={`${pat.name} ${first.name}`} sizes="(max-width: 900px) 100vw, 58vw" eager />
+      </div>
+      <div class="pdp__thumbs" id="pdpThumbs">
+        {views(first).map((v, i) => (
+          <button type="button" class={i === 0 ? 'on' : ''} data-src={v.src} aria-label={v.label}>
+            <Pic src={v.src} alt="" sizes="120px" widths={[800]} />
+            <span>{v.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <div class="pdp__info">
+      <nav class="crumbs crumbs--dark" aria-label="Breadcrumb"><a href="/collection/">Designer Collection</a><span>/</span></nav>
+      <p class="pdp__kicker">{pat.kicker}</p>
+      <h1 class="pdp__title">{pat.name}</h1>
+      <p class="pdp__colour">Colourway · <b id="pdpColour">{first.name}</b></p>
+      <div class="pdp__swatches" id="pdpSwatches">
+        {pat.colourways.map((c, i) => (
+          <button type="button" class={i === 0 ? 'on' : ''} data-key={c.key} style={`--c:${c.hex}`} aria-label={c.name} title={c.name}></button>
+        ))}
+      </div>
+      <p class="pdp__intro">{pat.intro}</p>
+      <ul class="pdp__notes">{pat.notes.map((n) => <li>{n}</li>)}</ul>
+      <div class="pdp__ctas">
+        <a href={`/contact/?design=${encodeURIComponent(`${pat.name} — ${first.name}`)}`} class="btn btn--teal magnetic" id="pdpCta" data-pattern={pat.name}><span>Request this design</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a href="/tailor-made/" class="btn btn--line"><span>Customise it</span></a>
+      </div>
+      <p class="pdp__fine">Sizes, weight, border and branding are specified per project. Colours matched to Pantone on request.</p>
+    </div>
+    <script type="application/json" id="pdpData" set:html={JSON.stringify(data)} />
+  </section>
+
+  <section class="more" data-theme-section="sand">
+    <h2 class="split">More <em>patterns.</em></h2>
+    <div class="more__grid">
+      {others.map((o) => (
+        <a class="more__card" href={`/collection/${o.slug}/`}>
+          <div><Pic src={o.colourways[0].detail ?? o.colourways[0].fold} alt={o.name} sizes="(max-width: 820px) 50vw, 20vw" /></div>
+          <h3>{o.name}</h3><span>{o.colourways.length} colourways</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <CtaBand title="Your pattern, <em>your colours.</em>" text="Custom jacquard is woven to your artwork and Pantone references. Send the brief and we’ll sample it." href="/tailor-made/" label="Explore Tailor-Made" />
+</Base>

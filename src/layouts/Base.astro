@@ -1,0 +1,82 @@
+---
+import { NAV, EMAIL } from '../data/site';
+interface Props {
+  title: string;
+  description?: string;
+  home?: boolean;
+  theme?: 'teal' | 'sand';
+}
+const { title, description = 'Emsworth Hospitality LLC FZ — Dubai-based hospitality linen, towels, bathrobes, amenities and project supply, manufactured by Christy Textile Products in Tamil Nadu.', home = false, theme = 'teal' } = Astro.props;
+const path = Astro.url.pathname;
+const fullTitle = home ? 'Emsworth Hospitality — The Feel Comes First' : `${title} — Emsworth Hospitality`;
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{fullTitle}</title>
+<meta name="description" content={description}>
+<meta name="theme-color" content="#0C3C3A">
+<meta property="og:title" content={fullTitle}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content="/images/banner/banner-2-1600.webp">
+<script is:inline>try{if(sessionStorage.getItem('emsTrans')==='1')document.documentElement.classList.add('is-trans')}catch(e){}</script>
+<link rel="icon" type="image/png" href="/assets/img/loop.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Mulish:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body data-theme={theme} class={home ? 'is-home' : 'is-inner'}>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="loop" viewBox="0 0 270 420">
+      <path d="M105,122 C103,100 85,90 70,93 C55,96 45,110 47,130 C48,137 50,142 52,145 C35,140 15,145 11,165 C7,190 30,210 60,213 C95,216 140,198 160,165 C175,140 168,110 148,106 C125,101 108,120 104,150 C100,185 104,230 125,275 C150,330 200,370 262,405" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <path id="circ" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/>
+  </defs>
+</svg>
+
+<div class="curtain" id="curtain" aria-hidden="true"><svg viewBox="0 0 270 420"><use href="#loop"/></svg></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a href="/" class="nav__logo" aria-label="Emsworth Hospitality home"><img src="/assets/img/logo.png" alt="Emsworth"><small>Hospitality</small></a>
+  <nav class="nav__links" aria-label="Primary">
+    {NAV.map((n) => <a href={n.href} class={path.startsWith(n.href) ? 'is-active' : ''}>{n.label}</a>)}
+  </nav>
+  <a href="/contact/" class="btn btn--pill magnetic"><span>Request samples</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+</header>
+<div class="menu" id="menu">
+  <a href="/">Home</a>
+  {NAV.map((n) => <a href={n.href}>{n.label}</a>)}
+  <a href="/contact/">Contact</a>
+</div>
+
+<main id="top">
+  <slot />
+</main>
+
+<footer class="footer">
+  <div class="footer__top">
+    <div><h5>Emsworth Hospitality LLC FZ</h5><p>Dubai, United Arab Emirates<br>UAE · GCC · Middle East · Africa</p></div>
+    <div><h5>Explore</h5><p><a href="/hospitality/">Hospitality</a><br><a href="/collection/">Designer Collection</a><br><a href="/tailor-made/">Tailor-Made</a><br><a href="/about/">About</a></p></div>
+    <div><h5>Enquiries</h5><p><a href={`mailto:${EMAIL}`}>{EMAIL}</a><br>www.emsworthhospitality.com</p></div>
+    <div><h5>Manufacturing</h5><p>Christy Textile Products Pvt. Ltd.<br>Tiruchengode, Tamil Nadu, India<br>ISO 9001 · GOTS · OEKO-TEX · SA8000</p></div>
+  </div>
+  <div class="footer__word"><img src="/assets/img/logo.png" alt="Emsworth"></div>
+  <div class="footer__bottom"><span>© 2026 Emsworth Hospitality LLC FZ</span><span>Integrated Hospitality Supply &amp; Project Solutions</span><a href="#top" data-top>Back to top ↑</a></div>
+</footer>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script is:inline src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+{home && <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>}
+{home && <script is:inline src="/assets/js/cloth.js"></script>}
+<script is:inline src="/assets/js/site.js"></script>
+</body>
+</html>

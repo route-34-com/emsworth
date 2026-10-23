@@ -1,0 +1,22 @@
+---
+import { EMAIL } from '../data/site';
+---
+<section class="contact" id="contact" data-theme-section="sand">
+  <div class="contact__loop" aria-hidden="true"><svg viewBox="0 0 270 420"><path id="contactPath" d="M105,122 C103,100 85,90 70,93 C55,96 45,110 47,130 C48,137 50,142 52,145 C35,140 15,145 11,165 C7,190 30,210 60,213 C95,216 140,198 160,165 C175,140 168,110 148,106 C125,101 108,120 104,150 C100,185 104,230 125,275 C150,330 200,370 262,405" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+  <div class="contact__copy">
+    <h2 class="split">Send us the specification.</h2>
+    <p class="contact__lede">We will send back a sample, a lead time we intend to keep, and the certificates <em>before you ask for them.</em></p>
+    <a class="contact__mail" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+  </div>
+  <form class="contact__form" id="contactForm" novalidate>
+    <div class="field2"><input id="fName" name="name" required placeholder=" "><label for="fName">Your name</label></div>
+    <div class="field2"><input id="fCo" name="company" placeholder=" "><label for="fCo">Property / company</label></div>
+    <div class="field2"><input id="fMail" name="email" type="email" required placeholder=" "><label for="fMail">Email</label></div>
+    <div class="chips" id="fCats" role="group" aria-label="Categories">
+      <button type="button">Bath linen</button><button type="button">Bed linen</button><button type="button">Robes &amp; slippers</button><button type="button">Pool &amp; beach</button><button type="button">Table &amp; F&amp;B</button><button type="button">Uniforms</button><button type="button">Designer Collection</button>
+    </div>
+    <div class="field2 field2--area"><textarea id="fMsg" name="message" rows="4" placeholder=" "></textarea><label for="fMsg">Rooms, quantities, timeline</label></div>
+    <button type="submit" class="btn btn--teal btn--wide magnetic"><span>Send enquiry</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <p class="contact__ok" id="formOk">Your mail app is opening with the enquiry ready to send.</p>
+  </form>
+</section>

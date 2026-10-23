@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import Contact from '../components/Contact.astro';
+import { EMAIL } from '../data/site';
+---
+<Base title="Contact" description="Request samples or start a project with Emsworth Hospitality, Dubai." theme="sand">
+  <div class="contact-page">
+    <Contact />
+    <section class="cinfo" data-theme-section="sand">
+      <article><h3>Dubai</h3><p>Emsworth Hospitality LLC FZ<br>Dubai, United Arab Emirates</p></article>
+      <article><h3>Manufacturing</h3><p>Christy Textile Products Pvt. Ltd.<br>Tiruchengode, Tamil Nadu, India</p></article>
+      <article><h3>Email</h3><p><a href={`mailto:${EMAIL}`}>{EMAIL}</a></p></article>
+      <article><h3>Coverage</h3><p>UAE · GCC · Middle East · Africa</p></article>
+    </section>
+  </div>
+</Base>

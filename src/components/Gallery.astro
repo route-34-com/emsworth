@@ -1,0 +1,15 @@
+---
+import Pic from './Pic.astro';
+interface Props { items: { src: string; alt: string }[]; title?: string; }
+const { items, title } = Astro.props;
+---
+<section class="gallery" data-theme-section="sand">
+  {title && <h2 class="gallery__title split" set:html={title} />}
+  <div class="gallery__grid">
+    {items.map((it) => (
+      <button type="button" class="gtile" data-full={`/images/${it.src}-1600.webp`} data-alt={it.alt} aria-label={`Open image: ${it.alt}`}>
+        <Pic src={it.src} alt={it.alt} sizes="(max-width: 820px) 50vw, 33vw" />
+      </button>
+    ))}
+  </div>
+</section>
