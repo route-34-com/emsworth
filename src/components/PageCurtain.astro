@@ -1,0 +1,93 @@
+---
+---
+<div class="curtain" id="curtain" aria-hidden="true">
+  <svg viewBox="0 0 270 420"><use href="#loop" /></svg>
+</div>
+
+<style is:global>
+  .curtain { position: fixed; inset: 0; z-index: 300; display: none; place-items: center; background: #072826; color: #EFCDB2; pointer-events: none; will-change: transform; }
+  .curtain svg { width: 80px; height: auto; }
+  html.is-trans .curtain { display: grid; }
+</style>
+
+<script>
+  const curtain = document.getElementById('curtain') as HTMLElement | null;
+  const mark = curtain?.querySelector('svg') as SVGElement | null;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EASE = 'cubic-bezier(.65, 0, .35, 1)';
+  const root = document.documentElement;
+  let leaving = false;
+
+  const finishEnter = () => {
+    if (!curtain) return;
+    curtain.style.display = 'none';
+    curtain.style.transform = '';
+    curtain.style.borderRadius = '';
+    if (mark) mark.style.opacity = '';
+    root.classList.remove('is-trans');
+  };
+
+  const enter = () => {
+    let flagged = false;
+    try { flagged = sessionStorage.getItem('emsTrans') === '1'; sessionStorage.removeItem('emsTrans'); } catch (e) {}
+    if (!curtain || !flagged || reduce) { finishEnter(); return; }
+    curtain.style.display = 'grid';
+    const hero = document.querySelector<HTMLImageElement>('main img');
+    const ready = hero && hero.decode ? hero.decode().catch(() => {}) : Promise.resolve();
+    Promise.race([ready, new Promise((r) => setTimeout(r, 900))]).then(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        mark?.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.9)' }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
+        const lift = curtain.animate(
+          [
+            { transform: 'translateY(0)', borderRadius: '0 0 0 0 / 0 0 0 0' },
+            { transform: 'translateY(-100%)', borderRadius: '0 0 50% 50% / 0 0 14% 14%' },
+          ],
+          { duration: 1100, delay: 250, easing: EASE, fill: 'forwards' },
+        );
+        lift.onfinish = finishEnter;
+      }));
+    });
+  };
+
+  const leave = (href: string) => {
+    if (leaving) return;
+    if (!curtain || reduce) { location.href = href; return; }
+    leaving = true;
+    try { sessionStorage.setItem('emsTrans', '1'); } catch (e) {}
+    curtain.style.display = 'grid';
+    const page = document.querySelectorAll<HTMLElement>('main, .sclose');
+    page.forEach((el) => el.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-60px)', opacity: 0.4 }], { duration: 900, easing: EASE, fill: 'forwards' }));
+    mark?.animate([{ opacity: 0, transform: 'scale(.8) rotate(-10deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], { duration: 500, delay: 550, easing: 'ease-out', fill: 'forwards' });
+    const rise = curtain.animate(
+      [
+        { transform: 'translateY(100%)', borderRadius: '50% 50% 0 0 / 14% 14% 0 0' },
+        { transform: 'translateY(0)', borderRadius: '0 0 0 0 / 0 0 0 0' },
+      ],
+      { duration: 900, easing: EASE, fill: 'forwards' },
+    );
+    rise.onfinish = () => { location.href = href; };
+  };
+
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element)?.closest?.('a') as HTMLAnchorElement | null;
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const raw = a.getAttribute('href');
+    if (!raw || raw.startsWith('#') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
+    if (a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-trans')) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname && url.search === location.search) return;
+    e.preventDefault();
+    leave(url.href);
+  });
+
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    leaving = false;
+    document.querySelectorAll<HTMLElement>('main, .sclose').forEach((el) => el.getAnimations().forEach((an) => an.cancel()));
+    curtain?.getAnimations().forEach((an) => an.cancel());
+    finishEnter();
+  });
+
+  enter();
+</script>

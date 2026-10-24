@@ -2,13 +2,16 @@
 import '../styles/global.css';
 import '../styles/main-port.css';
 import logo from '../assets/logo.svg?raw';
+import SiteClose from '../components/SiteClose.astro';
+import PageCurtain from '../components/PageCurtain.astro';
 import { collections, ranges } from '../data/catalogue';
 
-interface Props { title: string; description?: string; overHero?: boolean }
+interface Props { title: string; description?: string; overHero?: boolean; cta?: boolean }
 const {
   title,
   description = 'Hotel textiles woven in Tamil Nadu and supplied from Dubai: bath, bed, table, pool and spa linen, robes and slippers, made to your specification.',
   overHero = false,
+  cta = true,
 } = Astro.props;
 const nav = [
   ['Collections', '/collections/'], ['Designer', '/designer/'], ['Lookbook', '/lookbook/'], ['About', '/about/'],
@@ -16,7 +19,7 @@ const nav = [
 const path = Astro.url.pathname;
 ---
 <!doctype html>
-<html lang="en" data-palette="navybeige" data-type="mulish" data-theme="heritage">
+<html lang="en" data-palette="teal" data-type="mulish" data-theme="heritage">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -27,6 +30,7 @@ const path = Astro.url.pathname;
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
+  <script is:inline>try{if(sessionStorage.getItem('emsTrans')==='1')document.documentElement.classList.add('is-trans')}catch(e){}</script>
   <!-- Apply the saved design choice before first paint, so there is no flash. -->
   <script is:inline>
     (function () {
@@ -40,6 +44,7 @@ const path = Astro.url.pathname;
 <body>
   <!-- The line mark from the main site, used by the ported call-to-action bands. -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="loop" viewBox="0 0 270 420"><path d="M105,122 C103,100 85,90 70,93 C55,96 45,110 47,130 C48,137 50,142 52,145 C35,140 15,145 11,165 C7,190 30,210 60,213 C95,216 140,198 160,165 C175,140 168,110 148,106 C125,101 108,120 104,150 C100,185 104,230 125,275 C150,330 200,370 262,405" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></symbol></defs></svg>
+  <PageCurtain />
   <a class="skip" href="#main">Skip to content</a>
   <header class:list={['hdr', { 'hdr--over': overHero }]} data-hdr>
     <div class="hdr__in wrap">
@@ -60,26 +65,7 @@ const path = Astro.url.pathname;
 
   <main id="main"><slot /></main>
 
-  <footer class="ftr on-dark">
-    <div class="wrap">
-      <div class="ftr__top">
-        <div class="ftr__brand">
-          <a class="ftr__logo" href="/" aria-label="Emsworth Hospitality"><Fragment set:html={logo} /></a>
-          <p class="ftr__tag">The feel comes first.</p>
-          <p>Hotel textiles woven in Tamil Nadu and supplied from Dubai to the UAE, GCC, Middle East and Africa.</p>
-          <a class="btn" href="/request-a-quote/">Request a quote</a>
-        </div>
-        <div class="ftr__cols">
-          <div><span class="label">Collections</span>{collections.map((c) => <a href={`/collections/${c.slug}/`}>{c.name}</a>)}</div>
-          <div><span class="label">Ranges</span>{ranges.map((r) => <a href={`/ranges/${r.slug}/`}>{r.name}</a>)}</div>
-          <div><span class="label">Company</span><a href="/designer/">Designer Collection</a><a href="/designer/#studio">Towel studio</a><a href="/lookbook/">Lookbook</a><a href="/about/">About</a>
-            <a href="mailto:info@emsworthhospitality.com">info@emsworthhospitality.com</a></div>
-        </div>
-      </div>
-      <hr class="rule" />
-      <p class="ftr__fine">© 2026 Emsworth Hospitality LLC FZ, Dubai. Manufactured by Christy Textile Products Pvt. Ltd., Tiruchengode, Tamil Nadu. Specifications per the 2026 catalogue: GSM ±5%, dimensions ±3%.</p>
-    </div>
-  </footer>
+  <SiteClose cta={cta} />
 
   <!-- Lightbox for every gallery -->
   <dialog class="lb" data-lb aria-label="Photo viewer">

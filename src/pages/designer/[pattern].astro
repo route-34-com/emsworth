@@ -21,7 +21,7 @@ const views = (c: typeof first) =>
 const data = pat.colourways.map((c) => ({ key: c.key, name: c.name, views: views(c) }));
 const others = PATTERNS.filter((p) => p.slug !== pat.slug);
 ---
-<Base title={`${pat.name} · Designer Collection · Emsworth Hospitality`} description={`${pat.name}: ${pat.intro}`}>
+<Base cta={false} title={`${pat.name} · Designer Collection · Emsworth Hospitality`} description={`${pat.name}: ${pat.intro}`}>
   <div class="mb" data-tone="sand">
     <section class="pdp" data-theme-section="sand">
       <div class="pdp__stage">
