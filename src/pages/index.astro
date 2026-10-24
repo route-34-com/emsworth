@@ -27,7 +27,7 @@ const rangeItems = await Promise.all(ranges.map(async (r) => ({
   thumb: (await getImage({ src: r.lead, width: 480, format: 'webp' })).src,
 })));
 const patterns = inFolder('product-closeup').filter((_, i) => [0, 7, 12, 16, 20, 26].includes(i));
-const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pick('product-closeup', 'j8a2346'), href: '/designer/#studio' };
+const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pick('product-closeup', 'j8a2346'), href: '/designer/#studio', cta: 'Start your design' };
 ---
 <Base title="Emsworth Hospitality · Hotel textiles, woven for the finest rooms" overHero>
 
@@ -77,12 +77,12 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
         <h2>Every textile a guest touches</h2>
       </div>
       <div class="cols" data-rows>
-        {[...collections.map((c) => ({ title: c.name, kicker: c.kicker, image: c.image, href: `/collections/${c.slug}/` })), tailor].map((c, i) => (
+        {[...collections.map((c) => ({ title: c.name, kicker: c.kicker, image: c.image, href: `/collections/${c.slug}/`, cta: 'Discover the collection' })), tailor].map((c, i) => (
           <a class="col reveal" href={c.href} style={`--d:${i * 60}ms`} data-ar={(c.image.width / c.image.height).toFixed(4)}>
             <div class="col__img inset" style={`aspect-ratio: ${c.image.width} / ${c.image.height}`}><Image src={c.image} alt="" widths={[420, 720, 1100]} sizes="(max-width: 700px) 92vw, 45vw" /></div>
             <span class="label">{c.kicker}</span>
             <h3>{c.title}</h3>
-            <span class="link">Explore</span>
+            <span class="link link--icon">{c.cta}</span>
           </a>
         ))}
       </div>

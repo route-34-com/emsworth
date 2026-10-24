@@ -54,11 +54,11 @@ const shades: [string, string][] = [
     <header class="room__head">
       <nav class="crumbs" aria-label="Breadcrumb"><a href="/lookbook/">Lookbook</a><span>/</span>{c.name}</nav>
       <h1>{c.name}</h1>
-      <nav class="cols" aria-label="Sections">
-        {groups.map((g) => <a href={`#${g.id}`}>{g.hex && <i style={chip(g)}></i>}{g.name}</a>)}
-        <a href="#own" class="cols__own"><i></i>Your colour</a>
-      </nav>
     </header>
+    <nav class="cols" aria-label="Colours" data-cols>
+      {groups.map((g) => <a href={`#${g.id}`} data-for={g.id}>{g.hex && <i style={chip(g)}></i>}{g.name}</a>)}
+      <a href="#own" class="cols__own" data-for="own"><i></i>Your colour</a>
+    </nav>
 
     {asFlow && (
       <div class="gal gal--flow" data-gallery data-justify>
@@ -147,10 +147,20 @@ const shades: [string, string][] = [
   .crumbs { font: 600 12px var(--fb); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); display: flex; gap: 10px; }
   .crumbs a { color: inherit; }
   .room h1 { font-size: clamp(42px, 5.4vw, 76px); margin: 10px 0 0; }
-  .cols { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
-  .cols a { display: inline-flex; align-items: center; gap: 8px; font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .08em; text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; }
-  .cols a:hover { border-bottom-color: var(--accent); }
-  .cols i, .grp h2 i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+  /* Colour bar: the same rounded pill bar as the Designer filters; the section in view is highlighted. */
+  .cols { position: sticky; top: 84px; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 24px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .cols a { display: inline-flex; align-items: center; gap: 9px; padding: .62em 1.1em; border-radius: 999px; border: 1px solid transparent; text-decoration: none;
+    font: 700 14px/1 var(--fb); letter-spacing: .01em; color: var(--ink); transition: background .4s, color .4s, border-color .4s; }
+  .cols a:hover { border-color: var(--line); }
+  .cols :global(.cols__count) { margin-left: auto; padding: 0 10px; font-size: 14px; color: var(--soft); white-space: nowrap; }
+  .cols :global(.cols__count b) { color: var(--ink); }
+  .cols a.on { background: var(--primary); color: var(--ground); }
+  .cols a.on i { box-shadow: 0 0 0 2px var(--ground), inset 0 0 0 1px rgba(0,0,0,.15); }
+  .cols i, .grp h2 i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+  @media (max-width: 1020px) { .cols { top: 70px; } }
+  @media (max-width: 700px) { .cols { position: relative; top: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; border-radius: 999px; padding: 8px; }
+    .cols::-webkit-scrollbar { display: none; } .cols a { flex: none; } }
   .cols__own i { background: conic-gradient(#c9a227, #a8553a, #6d2235, #56708f, #8fa98a, #c9a227); }
   .grp { padding-top: clamp(44px, 5vw, 70px); scroll-margin-top: 100px; }
   .grp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
@@ -275,4 +285,27 @@ const shades: [string, string][] = [
     b.remove();
   }));
 
+</script>
+
+<script>
+  // Highlight the colour whose photos are in view.
+  const bar = document.querySelector<HTMLElement>('[data-cols]');
+  if (bar) {
+    const links = [...bar.querySelectorAll<HTMLAnchorElement>('a[data-for]')];
+    const n = document.querySelectorAll('[data-gallery] a[data-full]').length;
+    if (n) { const c = document.createElement('span'); c.className = 'cols__count'; c.innerHTML = `<b>${n}</b> photographs`; bar.appendChild(c); }
+    const targets = links.map((a) => document.getElementById(a.dataset.for!)).filter(Boolean) as HTMLElement[];
+    const setOn = (id: string) => links.forEach((a) => {
+      const on = a.dataset.for === id;
+      a.classList.toggle('on', on);
+      if (on && bar.scrollWidth > bar.clientWidth) bar.scrollTo({ left: a.offsetLeft - 16, behavior: 'smooth' });
+    });
+    const pick = () => {
+      let cur = targets[0]?.id;
+      for (const t of targets) if (t.getBoundingClientRect().top < innerHeight * 0.35) cur = t.id;
+      if (cur) setOn(cur);
+    };
+    addEventListener('scroll', pick, { passive: true });
+    pick();
+  }
 </script>
