@@ -148,12 +148,12 @@ h1 em, h2 em, h3 em { font-style: italic; }
   font: 700 12px/1 var(--fb); letter-spacing: .16em; text-transform: uppercase; color: var(--lab);
 }
 .link::after {
-  content: '→'; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; flex: none;
-  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); color: var(--accent);
-  font: 400 14px/1 var(--fb); letter-spacing: 0;
-  transition: background .4s, color .4s, border-color .4s, transform .5s cubic-bezier(.22, 1, .36, 1);
+  content: ''; display: inline-block; width: 30px; height: 30px; border-radius: 50%; flex: none; box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C6A57A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / 15px 15px no-repeat;
+  transition: background-color .4s, border-color .4s, transform .5s cubic-bezier(.22, 1, .36, 1);
 }
-.link:hover::after, a:hover > .link::after, a:focus-visible > .link::after { background: var(--accent); border-color: var(--accent); color: var(--dark); transform: translateX(4px); }
+.link:hover::after, a:hover .link::after, a:focus-visible .link::after { background-color: var(--accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23072826' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E"); border-color: var(--accent); transform: translateX(4px); }
 .on-dark .link { color: var(--accent); }
 
 /* Add to quote */
@@ -259,4 +259,4 @@ html, body { overflow-x: clip; }
 a[data-full], [data-gallery] a[data-full] img { cursor: zoom-in; }
 /* Arrow disc only: the words stay for screen readers. */
 .link--icon { font-size: 0; gap: 0; letter-spacing: 0; }
-.link--icon::after { width: 38px; height: 38px; font-size: 16px; }
+.link--icon::after { width: 40px; height: 40px; background-size: 17px 17px; }
