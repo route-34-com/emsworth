@@ -1,6 +1,5 @@
 ---
 import { Image, getImage } from 'astro:assets';
-import ProductShowcase from '../components/ProductShowcase.jsx';
 import CircularCarousel from '../components/reactbits/CircularCarousel.jsx';
 import Base from '../layouts/Base.astro';
 import Loader from '../components/Loader.astro';
@@ -8,9 +7,11 @@ import Numbers from '../components/Numbers.astro';
 import Reach from '../components/Reach.astro';
 import Weave from '../components/Weave.astro';
 import { collections, ranges, tiers, certifications, process } from '../data/catalogue';
-import { pick, inFolder } from '../data/shoot';
+import { pick } from '../data/shoot';
 
+import heroes from '../data/heroes.json';
 import heroA from '../assets/hero/robe-recline.jpg';
+const tune = (heroes as any).home;
 const signature = pick('web-banner', 'j8a0879-edit');
 const stack = pick('ranges/feather-nest/hand', 'j8a0828-edit');
 const location = pick('outdoor/s1', 'j8a1104-edit');
@@ -20,24 +21,16 @@ const introRing = await Promise.all(([
   ['ranges/pool-towel', 'j8a1008-edit'], ['hand-towel', 'j8a0738'], ['garden', 'dsc01229'],
 ] as [string, string][]).map(async ([f, n]) => ({ src: (await getImage({ src: pick(f, n), width: 600, format: 'webp' })).src, alt: 'Emsworth towels and linen' })));
 
-// The six ranges for the spinning carousel / accordion (switchable at the side).
-const rangeItems = await Promise.all(ranges.map(async (r) => ({
-  name: r.name, sub: r.tag, href: `/ranges/${r.slug}/`,
-  image: (await getImage({ src: r.lead, width: 900, format: 'webp' })).src,
-  thumb: (await getImage({ src: r.lead, width: 480, format: 'webp' })).src,
-})));
-const patterns = inFolder('product-closeup').filter((_, i) => [0, 7, 12, 16, 20, 26].includes(i));
-const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pick('product-closeup', 'j8a2346'), href: '/designer/#studio' };
 ---
 <Base title="Emsworth Hospitality · Hotel textiles, woven for the finest rooms" overHero>
 
   <div class="mb"><Loader /></div>
 
   <!-- Hero: one photograph, edge to edge, and one line -->
-  <section class="hero">
-    <Image class="hero__img" src={heroA} alt="Guest reclining in a white Emsworth robe beside a throw embroidered with EMSWORTH"
+  <section class="hero" data-hero data-tuned={tune ? '' : undefined} style={`--ar: ${(heroA.width / heroA.height).toFixed(4)}` + (tune ? `; --z: ${tune.z}; --px: ${tune.px}; --py: ${tune.py}; --tx: ${tune.tx}%; --ty: ${tune.ty}%; --tw: ${tune.tw}px; --ts: ${tune.ts}` : '')}>
+    <Image class="hero__img" data-tune-img src={heroA} alt="Guest reclining in a white Emsworth robe beside a throw embroidered with EMSWORTH"
       widths={[800, 1400, 2000, 2800]} sizes="100vw" loading="eager" fetchpriority="high" />
-    <h1 class="hero__line"><span class="ln"><span>The Feel</span></span><span class="ln"><em>Comes First</em></span></h1>
+    <h1 class="hero__line" data-tune-text><span class="ln"><span>The Feel</span></span><span class="ln"><em>Comes First</em></span></h1>
     <a class="hero__cue" href="#colour" aria-label="Scroll down"><span></span></a>
   </section>
 
@@ -50,8 +43,8 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
       <div class="reveal">
         <span class="orn"></span>
         <span class="label">The Emsworth way</span>
-        <h2>Woven in Tamil Nadu.<br/><em>Delivered across the world.</em></h2>
-        <p class="lead">Emsworth brings the looms of the Christy textile group in Tiruchengode to hotel procurement teams in Dubai and beyond: one partner from specification and sampling to production, shipping and replenishment.</p>
+        <h2>From our looms<br/><em>to your rooms.</em></h2>
+        <p class="lead">Emsworth is the hotel arm of the Christy textile group: towels, robes, bed and table linen woven, dyed and finished in our own mill, then specified, sampled and replenished by one team for every property you run.</p>
         <dl class="facts">
           <div><dt>180 tonnes</dt><dd>woven a month on Itema and Stäubli looms</dd></div>
           <div><dt>Since 2004</dt><dd>making terry, linen and made-ups</dd></div>
@@ -67,27 +60,6 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
 
   <!-- From the main site: the mill in numbers, and where we deliver -->
   <div class="mb"><Numbers /><Reach /></div>
-
-  <!-- Collections -->
-  <section class="sec sec--ground">
-    <div class="wrap">
-      <div class="sec__head sec__head--center reveal">
-        <span class="orn"></span>
-        <span class="label">The collections</span>
-        <h2>Every textile a guest touches</h2>
-      </div>
-      <div class="cols" data-rows>
-        {[...collections.map((c) => ({ title: c.name, kicker: c.kicker, image: c.image, href: `/collections/${c.slug}/` })), tailor].map((c, i) => (
-          <a class="col reveal" href={c.href} style={`--d:${i * 60}ms`} data-ar={(c.image.width / c.image.height).toFixed(4)}>
-            <div class="col__img inset" style={`aspect-ratio: ${c.image.width} / ${c.image.height}`}><Image src={c.image} alt="" widths={[420, 720, 1100]} sizes="(max-width: 700px) 92vw, 45vw" /></div>
-            <span class="label">{c.kicker}</span>
-            <h3>{c.title}</h3>
-            <span class="link">Explore</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
 
   <!-- Tiers -->
   <section class="sec sec--primary on-dark tiers">
@@ -111,34 +83,7 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
     </div>
   </section>
 
-  <!-- Ranges -->
-  <section class="sec">
-    <div class="wrap">
-      <div class="sec__head reveal">
-        <span class="orn"></span>
-        <span class="label">The ranges</span>
-        <h2>Six ranges, <em>photographed in full</em></h2>
-        <p class="lead">From hotel white to safari jacquard. Every range can be dyed to your Pantone and finished with your crest.</p>
-      </div>
-      <ProductShowcase client:only="react" items={rangeItems} modes={["accordion"]} />
-    </div>
-  </section>
 
-  <!-- Tailor-made -->
-  <section class="sec tm">
-    <div class="wrap tm__grid">
-      <div class="tm__mosaic reveal" data-rows data-rows-max="3">
-        {patterns.map((p) => p.src).map((src) => <span data-ar={(src.width / src.height).toFixed(4)} style={`aspect-ratio: ${src.width} / ${src.height}`}><Image src={src} alt="Emsworth jacquard pattern with woven label" widths={[300, 520, 800]} sizes="(max-width: 860px) 50vw, 24vw" /></span>)}
-      </div>
-      <div class="reveal">
-        <span class="orn"></span>
-        <span class="label">Tailor-made</span>
-        <h2>Your crest, <em>woven in.</em></h2>
-        <p class="lead">Every article can be built to your own dimension, border, colour and branding: jacquard logos woven into the border, embroidery, woven labels, Pantone-matched dyes and yarn-dyed stripes.</p>
-        <a class="btn btn--line" href="/designer/#studio">See what we can weave</a>
-      </div>
-    </div>
-  </section>
 
   <!-- On location -->
   <section class="loc">
@@ -198,8 +143,8 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
   :global(html:not(.is-ready)) .hero__line .ln > * { animation-play-state: paused; }
 
   @keyframes lineUp { from { transform: translateY(110%); } to { transform: none; } }
-  :global([data-type='mulish']) .hero__line { font-weight: 900; letter-spacing: -.05em; line-height: .92; }
-  :global([data-type='mulish']) .hero__line em { color: color-mix(in srgb, var(--accent) 45%, #fff); }
+  /* Both lines in the same colour as "Comes First". */
+  .hero__line { color: color-mix(in srgb, var(--accent) 45%, #fff); }
   @keyframes settle { from { transform: scale(1.04); } to { transform: none; } }
   .hero__cue { position: absolute; z-index: 2; right: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); bottom: clamp(40px, 7vh, 76px); width: 1px; height: 48px; background: rgba(255,255,255,.35); overflow: hidden; }
   .hero__cue span { position: absolute; inset: 0; background: #fff; animation: drip 2.4s ease-in-out infinite; transform-origin: top; }
@@ -213,7 +158,7 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
   .intro__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(36px, 6vw, 100px); align-items: center; }
   .intro h2 { font-size: clamp(38px, 4.8vw, 66px); margin: 12px 0 22px; }
   .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 36px 0 0; border-top: 4px double var(--line); padding-top: 22px; }
-  .facts dt { font: 400 clamp(22px, 2.2vw, 30px)/1.1 var(--fd); color: var(--primary); }
+  .facts dt { font: 400 clamp(20px, 2vw, 30px)/1.1 var(--fd); color: var(--primary); white-space: nowrap; }
   .facts dd { margin: 6px 0 0; font-size: 14px; color: var(--soft); }
   /* Seven photos, and the ring runs a little past its column into the margin so the cards stay large. */
   .intro__ring { height: clamp(440px, 40vw, 600px); width: calc(100% + 9vw); margin-right: -9vw; }
@@ -226,14 +171,6 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
   .intro__b img { display: block; width: 100%; height: auto; }
 
   /* Collections */
-  /* Collections, ranges and patterns: each photo whole, in rows the script scales to fill the width (scripts/justify.ts). */
-  .cols { display: flex; flex-wrap: wrap; gap: clamp(30px, 3vw, 44px) clamp(18px, 2.4vw, 34px); }
-  .col { display: grid; gap: 8px; justify-items: start; align-content: start; width: calc(33.333% - 23px); text-decoration: none; transition-delay: var(--d); }
-  .col__img { width: 100%; overflow: hidden; margin-bottom: 10px; }
-  .col__img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
-  .col:hover .col__img img { transform: scale(1.04); }
-  .col h3 { font-size: clamp(28px, 2.6vw, 38px); }
-  .col .link { margin-top: 6px; }
 
   /* Tiers */
   .tiers__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: color-mix(in srgb, var(--accent) 35%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
@@ -250,13 +187,6 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
   /* Ranges */
 
 
-  /* Tailor-made */
-  .tm__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 6vw, 100px); align-items: center; }
-  .tm h2 { font-size: clamp(38px, 4.8vw, 66px); margin: 12px 0 20px; }
-  .tm .lead { margin-bottom: 28px; }
-  .tm__mosaic { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tm__mosaic > span { display: block; width: calc(33.333% - 6px); overflow: hidden; }
-  .tm__mosaic img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
   /* On location */
   .loc { position: relative; height: min(88svh, 860px); overflow: hidden; color: var(--ground); }
@@ -289,7 +219,7 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
     .tiers__grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 860px) {
-    .intro__grid, .tm__grid, .her__grid { grid-template-columns: 1fr; }
+    .intro__grid, .her__grid { grid-template-columns: 1fr; }
     .intro__pics { margin-top: 10px; }
   }
   @media (max-width: 600px) {
@@ -302,15 +232,10 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
     .hero__img { object-position: 76% 40%; }
     .hero::before { background: linear-gradient(180deg, rgba(0,0,0,.32), transparent 16%); }
     .hero { height: 100svh; }
-    .hero__line { top: 50%; font-size: 42px; color: #1c1a18; text-shadow: 0 0 24px rgba(255,255,255,.6); } /* on a phone the line sits over the white robe */
+    .hero__line { top: 50%; font-size: 42px; color: #1c1a18; text-shadow: 0 0 24px rgba(255,255,255,.6); }
+    .hero__line { color: #1c1a18; } /* on a phone the line sits over the white robe */
     .hero__cue { display: none; }
   }
 </style>
 
-<script>
-  import { justifyAll } from '../scripts/justify';
-  // Rows of whole photographs: up to three to a row on desktop, two on a tablet, one on a phone (patterns stay three).
-  justifyAll('.cols[data-rows]', { target: () => (innerWidth > 1100 ? 480 : 380), maxPerRow: () => (innerWidth > 860 ? 3 : innerWidth > 600 ? 2 : 1) });
-  justifyAll('.tm__mosaic[data-rows]', { target: () => (innerWidth > 860 ? 200 : 170), maxPerRow: () => 3 });
-</script>
 

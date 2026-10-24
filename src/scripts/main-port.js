@@ -4,6 +4,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { addToQuote, syncQuote } from './site';
+import { LAND_TOP, LAND_ROWS } from '../data/land.js';
 
 (function () {
   const $ = (s, c = document) => c.querySelector(s);
@@ -15,7 +16,7 @@ import { addToQuote, syncQuote } from './site';
 
   const reveal = (sel, trigger, vars = {}) => {
     if (!$(sel)) return;
-    gsap.from(sel, Object.assign({ y: 60, autoAlpha: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: trigger || sel, start: 'top 86%' } }, vars));
+    gsap.from(sel, Object.assign({ y: 40, autoAlpha: 0, duration: 0.7, ease: 'expo.out', stagger: 0.05, scrollTrigger: { trigger: trigger || sel, start: 'top 94%' } }, vars));
   };
   // Our hero line waits for this class, so it rises after the loader rather than behind it.
   const heroIn = () => document.documentElement.classList.add('is-ready');
@@ -51,8 +52,8 @@ import { addToQuote, syncQuote } from './site';
     const words = wrapWords(el);
     gsap.set(words, { yPercent: 115, rotate: 4 });
     ScrollTrigger.create({
-      trigger: el, start: 'top 88%', once: true,
-      onEnter: () => gsap.to(words, { yPercent: 0, rotate: 0, duration: 1.2, ease: 'expo.out', stagger: 0.05 }),
+      trigger: el, start: 'top 95%', once: true,
+      onEnter: () => gsap.to(words, { yPercent: 0, rotate: 0, duration: 0.75, ease: 'expo.out', stagger: 0.025 }),
     });
   });
 
@@ -63,7 +64,7 @@ import { addToQuote, syncQuote } from './site';
     el.classList.add('split');
     const words = wrapWords(el);
     gsap.set(words, { yPercent: 115, rotate: 4 });
-    ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: () => gsap.to(words, { yPercent: 0, rotate: 0, duration: 1.2, ease: 'expo.out', stagger: 0.05 }) });
+    ScrollTrigger.create({ trigger: el, start: 'top 95%', once: true, onEnter: () => gsap.to(words, { yPercent: 0, rotate: 0, duration: 0.75, ease: 'expo.out', stagger: 0.025 }) });
   });
 
   /* ---------- home loader ---------- */
@@ -109,7 +110,7 @@ import { addToQuote, syncQuote } from './site';
       el.textContent = from;
       ScrollTrigger.create({
         trigger: el, start: 'top 88%', once: true,
-        onEnter: () => gsap.to(o, { v: to, duration: 2.4, ease: 'expo.out', onUpdate: () => (el.textContent = Math.round(o.v)) }),
+        onEnter: () => gsap.to(o, { v: to, duration: 1.6, ease: 'expo.out', onUpdate: () => (el.textContent = Math.round(o.v)) }),
       });
     });
     reveal('.stat', '.numbers__grid');
@@ -242,28 +243,23 @@ import { addToQuote, syncQuote } from './site';
     const pal = (k) => tint(k, 1);
     const ctx = cv.getContext('2d');
     const labels = $('#mapLabels');
-    const LAND = [
-      [[35, 28], [39, 22], [43, 13], [45, 12.8], [52, 16], [57, 19], [59.8, 22.5], [56.5, 26.5], [52, 24], [50.5, 26], [48, 29.5], [47, 30], [39, 32], [35, 32]],
-      [[-17, 21], [-10, 30], [-5, 35.8], [10, 37], [11, 33], [20, 31], [32, 31.5], [35, 28], [43, 12], [51, 11.8], [41, -2], [40, -11], [35, -24], [26, -34], [18, -34], [12, -17], [9, -1], [9, 4], [-8, 4.5], [-17, 14]],
-      [[68, 23.5], [72, 21], [73, 16], [76.5, 8.2], [80, 10], [80.3, 15.5], [87, 21.5], [89, 22], [92, 22.5], [92, 26], [88, 27], [81, 30], [78, 35], [74, 34.5], [70, 28], [68.5, 25]],
-      [[44, 37], [48, 30], [50.5, 29.5], [56.5, 27], [61.5, 25.2], [66.5, 25.4], [68, 23.5], [70, 28], [74, 34.5], [71, 36.7], [60, 37.5], [54, 37.3], [48, 38.5], [44, 39.5]],
-      [[35, 32], [36, 36], [28, 36.5], [26, 40], [44, 39.5], [44, 37], [39, 32]],
-      [[79.7, 9.8], [81.9, 7.5], [81.2, 6.1], [80, 6], [79.8, 8]],
-    ];
-    const HUB = { n: 'Jebel Ali · Dubai', s: 'Emsworth hub', lon: 55.0, lat: 25.0, big: true, a: 't' };
+    // The whole world, delivered from the Dubai hub. Gulf neighbours get a dot but no label so the hub stays readable.
+    const HUB = { n: 'Jebel Ali · Dubai', s: 'Emsworth hub', lon: 55.0, lat: 25.0, big: true, a: 'tr' };
     const MILL = { n: 'Tiruchengode', s: 'Christy mill', lon: 77.9, lat: 11.4, big: true };
     const DEST = [
-      { n: 'Riyadh', lon: 46.7, lat: 24.7, a: 'l' }, { n: 'Doha', lon: 51.5, lat: 25.3, hide: true }, { n: 'Muscat', lon: 58.4, lat: 23.6, a: 'b' },
-      { n: 'Kuwait', lon: 47.9, lat: 29.4 }, { n: 'Manama', lon: 50.6, lat: 26.2, hide: true }, { n: 'Jeddah', lon: 39.2, lat: 21.5, a: 'l' },
-      { n: 'Cairo', lon: 31.2, lat: 30.0, a: 'l' }, { n: 'Nairobi', lon: 36.8, lat: -1.3 }, { n: 'Addis Ababa', lon: 38.7, lat: 9.0 }, { n: 'Mombasa', lon: 39.7, lat: -4.0, hide: true },
+      { n: 'Riyadh', lon: 46.7, lat: 24.7, hide: true }, { n: 'Doha', lon: 51.5, lat: 25.3, hide: true }, { n: 'Muscat', lon: 58.4, lat: 23.6, hide: true },
+      { n: 'Kuwait', lon: 47.9, lat: 29.4, hide: true }, { n: 'Jeddah', lon: 39.2, lat: 21.5, hide: true },
+      { n: 'Mumbai', lon: 72.9, lat: 19.1, hide: true }, { n: 'Maldives', lon: 73.5, lat: 4.2, hide: true }, { n: 'Cairo', lon: 31.2, lat: 30.0, a: 'l' },
+      { n: 'Istanbul', lon: 29.0, lat: 41.0, a: 'l' }, { n: 'Nairobi', lon: 36.8, lat: -1.3 }, { n: 'Singapore', lon: 103.8, lat: 1.35 },
+      { n: 'London', lon: -0.1, lat: 51.5, a: 'l' }, { n: 'Paris', lon: 2.35, lat: 48.9, hide: true }, { n: 'Hong Kong', lon: 114.2, lat: 22.3 },
+      { n: 'Cape Town', lon: 18.4, lat: -33.9 }, { n: 'Tokyo', lon: 139.7, lat: 35.7, a: 'l' }, { n: 'Sydney', lon: 151.2, lat: -33.9, a: 'l' },
+      { n: 'New York', lon: -74.0, lat: 40.7 }, { n: 'Toronto', lon: -79.4, lat: 43.7, hide: true }, { n: 'Miami', lon: -80.2, lat: 25.8, a: 'l' },
+      { n: 'São Paulo', lon: -46.6, lat: -23.5 }, { n: 'Los Angeles', lon: -118.2, lat: 34.1, a: 'b' },
     ];
-    const inPoly = (pt, poly) => {
-      let c = false;
-      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        const [xi, yi] = poly[i], [xj, yj] = poly[j];
-        if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c;
-      }
-      return c;
+    const isLand = (lon, lat) => {
+      const r = Math.floor(LAND_TOP - lat), c = Math.floor(lon + 180);
+      if (r < 0 || r >= LAND_ROWS.length || c < 0 || c >= 360) return false;
+      return (parseInt(LAND_ROWS[r][c >> 2], 16) >> (3 - (c & 3))) & 1;
     };
     let W, H, dpr, proj, dots = [];
     const state = { p: 0 };
@@ -272,15 +268,14 @@ import { addToQuote, syncQuote } from './site';
       const r = cv.getBoundingClientRect();
       W = r.width; H = r.height;
       cv.width = W * dpr; cv.height = H * dpr;
-      const lon0 = 25, lon1 = 83, lat0 = -6, lat1 = 37;
-      const sc = Math.min(W / (lon1 - lon0), H / (lat1 - lat0)) * 1.04;
+      const lon0 = -128, lon1 = 158, lat0 = -44, lat1 = 66;
+      const sc = Math.min(W / (lon1 - lon0), H / (lat1 - lat0));
       const ox = (W - (lon1 - lon0) * sc) / 2, oy = (H - (lat1 - lat0) * sc) / 2;
       proj = (lon, lat) => [ox + (lon - lon0) * sc, oy + (lat1 - lat) * sc];
       dots = [];
-      const step = Math.max(7, W / 70);
-      for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) {
-        const lon = (x - ox) / sc + lon0, lat = lat1 - (y - oy) / sc;
-        dots.push([x, y, LAND.some((p) => inPoly([lon, lat], p))]);
+      const step = Math.max(6, W / 120);
+      for (let y = step / 2; y < H; y += step) for (let x = step / 2; x < W; x += step) {
+        dots.push([x, y, isLand((x - ox) / sc + lon0, lat1 - (y - oy) / sc)]);
       }
       labels.innerHTML = '';
       [HUB, MILL, ...DEST].forEach((d) => {
@@ -293,6 +288,7 @@ import { addToQuote, syncQuote } from './site';
         if (d === MILL) { el.style.transform = 'translate(calc(-100% + 10px), 16px)'; el.style.textAlign = 'right'; }
         if (d.a === 'l') el.style.transform = 'translate(calc(-100% - 10px), -50%)';
         if (d.a === 'b') el.style.transform = 'translate(-30%, 10px)';
+        if (d.a === 'tr') el.style.transform = 'translate(8px, calc(-100% - 12px))';
         if (d.a === 't') el.style.transform = 'translate(-20%, calc(-100% - 14px))';
         labels.appendChild(el);
         d.el = el;
@@ -300,7 +296,7 @@ import { addToQuote, syncQuote } from './site';
     };
     const bez = (a, b, u, lift) => {
       const [x1, y1] = proj(a.lon, a.lat), [x2, y2] = proj(b.lon, b.lat);
-      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - Math.hypot(x2 - x1, y2 - y1) * lift;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - Math.min(Math.hypot(x2 - x1, y2 - y1) * lift, H * 0.2);
       return [(1 - u) * (1 - u) * x1 + 2 * (1 - u) * u * mx + u * u * x2, (1 - u) * (1 - u) * y1 + 2 * (1 - u) * u * my + u * u * y2];
     };
     const arc = (a, b, t, lift) => { const pts = []; for (let i = 0; i <= 40 * t; i++) pts.push(bez(a, b, i / 40, lift)); return pts; };
@@ -318,7 +314,7 @@ import { addToQuote, syncQuote } from './site';
       const line = (pts, color, w) => { if (pts.length < 2) return; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); };
       line(arc(MILL, HUB, p1, 0.35), pal('--brass'), 2.4);
       DEST.forEach((d, i) => {
-        const t = gsap.utils.clamp(0, 1, (state.p - 0.4 - i * 0.03) * 4);
+        const t = gsap.utils.clamp(0, 1, (state.p - 0.3 - i * (0.5 / DEST.length)) * 5);
         line(arc(HUB, d, t, 0.25), tint('--peach', .75), 1.2);
         if (d.el) d.el.style.opacity = t > 0.95 ? 1 : 0;
         if (t >= 1) {
@@ -345,7 +341,7 @@ import { addToQuote, syncQuote } from './site';
     layout();
     new IntersectionObserver((en) => { const was = visible; visible = en[0].isIntersecting; if (visible && !was) draw(); }).observe(cv);
     window.addEventListener('resize', layout);
-    ScrollTrigger.create({ trigger: '.reach__map', start: 'top 80%', once: true, onEnter: () => gsap.to(state, { p: 1, duration: 4.5, ease: 'power2.inOut' }) });
+    ScrollTrigger.create({ trigger: '.reach__map', start: 'top 80%', once: true, onEnter: () => gsap.to(state, { p: 1, duration: 3.2, ease: 'power2.inOut' }) });
     reveal('.reach__list li', '.reach__list', { x: -30, y: 0, stagger: 0.07 });
   }
 

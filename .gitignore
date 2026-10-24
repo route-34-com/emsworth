@@ -3,3 +3,6 @@ dist
 .astro
 _work
 .DS_Store
+
+# Local-only tool (drag/zoom hero placement); not part of the published site.
+public/hero-editor

@@ -73,11 +73,7 @@ export default function ProductShowcase({ items, modes = ['accordion', 'orbit', 
                     <b>{items[hovered].name}</b>
                     <span>Open →</span>
                   </a>
-                ) : (
-                  <span className="showcase__center showcase__center--idle">
-                    <b>Hover a photo</b>
-                  </span>
-                )
+                ) : null
               }
             />
           </div>

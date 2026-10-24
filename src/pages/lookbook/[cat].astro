@@ -2,6 +2,8 @@
 import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { COLOURS, CATEGORIES, STYLE_NAMES, STYLE_ORDER, tagged } from '../../data/colours';
+import Pic from '../../components/Pic.astro';
+import { PATTERNS } from '../../data/main';
 
 // One product from the lookbook, colour by colour and, within a colour, style by style; then "made in your colour".
 export function getStaticPaths() {
@@ -12,33 +14,54 @@ interface Props { c: Cat; prev: Cat; next: Cat }
 const { c, prev, next } = Astro.props;
 const mine = tagged.filter((p) => p.cat === c.id);
 const full = new Map(await Promise.all(mine.map(async (p) => [p, (await getImage({ src: p.src, width: 1600, format: 'webp' })).src] as const)));
-let groups = COLOURS.map((col) => {
-  const photos = mine.filter((p) => p.col === col.id);
-  const styles = STYLE_ORDER.map((st) => ({ id: st, name: STYLE_NAMES[st], photos: photos.filter((p) => p.style === st) })).filter((x) => x.photos.length);
-  return { ...col, n: photos.length, styles };
-}).filter((g) => g.n > 0);
-// One colour in several designs (bath mats, bed linen): each design is its own group.
-if (groups.length === 1 && groups[0].styles.length > 1) {
-  groups = groups[0].styles.map((st) => ({ ...groups[0], id: st.id, name: st.name, hex: '', n: st.photos.length, styles: [st] }));
-}
-// Smaller products run as one continuous flow, each photo labelled with its colour (and style); the big towel range keeps sections.
-const asFlow = mine.length <= 60;
-const label = (g: (typeof groups)[number], st: { name: string }) => (g.styles.length > 1 && g.name !== st.name ? `${g.name} · ${st.name}` : g.name);
-// Under the photo, a colour with several styles shows just the style (the dot gives the colour); the full label stays in the lightbox.
-const short = (g: (typeof groups)[number], st: { name: string }) => (g.styles.length > 1 && g.name !== st.name ? st.name : g.name);
-const flow = groups.flatMap((g) => g.styles.flatMap((st) => st.photos.map((p) => ({ p, g, st }))))
-  .map((x, i, all) => ({ ...x, first: i === 0 || all[i - 1].g.id !== x.g.id }));
-// In sections, a style with only one or two photos joins the gallery before it (each labelled), so no photo sits alone.
-const blocks = (g: (typeof groups)[number]) => g.styles.reduce((out, st) => {
-  if (st.photos.length < 3 && out.length) out.at(-1)!.photos.push(...st.photos.map((p) => ({ p, tag: st.name })));
-  else out.push({ ...st, photos: st.photos.map((p) => ({ p, tag: '' })) });
-  return out;
-}, [] as { id: string; name: string; photos: { p: (typeof mine)[number]; tag: string }[] }[]);
-const total = mine.length;
-const SHOW = 8; // tiles per colour before "show all"
+// Every photo in one gallery, ordered colour by colour and style by style; a filter bar narrows it by design and colour.
 const chip = (k: { id: string; hex: string; two?: boolean }) =>
-  k.id === 'mixed' ? 'background: conic-gradient(#a6472b 0 17%, #24479b 0 34%, #7ba477 0 50%, #1c1c1c 0 67%, #eee3c9 0 84%, #45444b 0)'
-  : k.two ? `background: linear-gradient(135deg, ${k.hex} 50%, #eee3c9 50%)` : `background: ${k.hex}`;
+  k.id === 'mixed' ? 'background: radial-gradient(circle, #f3ead6 0 30%, transparent 33%), conic-gradient(#a6472b 0 25%, #24479b 0 50%, #7ba477 0 75%, #1c1c1c 0)'
+  : k.two ? `background: radial-gradient(circle, #f3ead6 0 34%, ${k.hex} 37%)` : `background: ${k.hex}`;
+// Our own towel designs (bath only) sit in the same gallery: their colourways mapped onto the lookbook colours and designs.
+const designs = c.id === 'bath' ? PATTERNS : [];
+const CW_COLOUR: Record<string, string> = { navy: 'navy', terracotta: 'rust', sage: 'sage', onyx: 'black', white: 'white', ivory: 'ivory', natural: 'ivory',
+  sand: 'tan', blush: 'pink', olive: 'olive', slate: 'grey', charcoal: 'charcoal', leopard: 'tan', 'snow-leopard': 'black', zebra: 'black' };
+const designOf = (pat: string, key: string) => (pat === 'animal' ? key : pat);
+const DESIGN_NAMES: Record<string, string> = { ...STYLE_NAMES, swirl: 'Swirl', harlequin: 'Harlequin' };
+const colours = COLOURS.filter((col) => mine.some((p) => p.col === col.id) || designs.some((d) => d.colourways.some((cw) => CW_COLOUR[cw.key] === col.id)));
+const styles = [...STYLE_ORDER.filter((st) => mine.some((p) => p.style === st)), ...['swirl', 'harlequin'].filter((d) => designs.some((x) => x.slug === d))];
+const ordered = colours.flatMap((col) => styles.flatMap((st) => mine.filter((p) => p.col === col.id && p.style === st)));
+const colOf = (id: string) => colours.find((x) => x.id === id)!;
+const capOf = (p: (typeof mine)[number]) => (styles.length > 1 && colours.length > 1 ? `${colOf(p.col).name} · ${STYLE_NAMES[p.style]}` : colours.length > 1 ? colOf(p.col).name : STYLE_NAMES[p.style]);
+// One tile per design in a colour; the rest open with it in the viewer.
+let groupsOf = colours.flatMap((col) => styles.map((st) => ordered.filter((p) => p.col === col.id && p.style === st))).filter((g) => g.length);
+// The cover is the towel itself when most designs here have a product-only photo (or when our own designs are in the grid);
+// otherwise a photo with the model. Model photos then follow as the other views.
+const towelFirst = designs.length > 0 || groupsOf.filter((g) => g.some((p) => !p.person)).length > groupsOf.length / 2;
+groupsOf = groupsOf.map((g) => [...g].sort((x, y) => (towelFirst ? Number(x.person) - Number(y.person) : Number(y.person) - Number(x.person))));
+// Towel-only close-ups cut from a model photo, for a design that has no product-only shot (src/assets/closeups/<cat>-<colour>-<style>.jpg).
+const closeups = import.meta.glob<{ default: ImageMetadata }>('../../assets/closeups/*.jpg', { eager: true });
+const closeupOf = (col: string, st: string) => closeups[`../../assets/closeups/${c.id}-${col}-${st}.jpg`]?.default;
+type View = { href: string; cap: string };
+type Tile = { d: string; c: string; ar: number; cap: string; dot: string; cover: { pic?: string; img?: ImageMetadata; alt: string }; views: View[]; link?: string };
+const tiles: Tile[] = [
+  // Our designs: the folded towel is the cover; its set, close-up and face-towel views, then any shoot photos of the same design and colour.
+  ...designs.flatMap((pat) => pat.colourways.map((cw) => {
+    const d = designOf(pat.slug, cw.key), col = CW_COLOUR[cw.key];
+    const shoot = groupsOf.find((g) => g[0].style === d && g[0].col === col);
+    if (shoot) groupsOf = groupsOf.filter((g) => g !== shoot);
+    const own = [cw.fold, cw.set, cw.detail, cw.face, cw.slipper].filter(Boolean) as string[];
+    const big = (v: string) => `/images/${v}-${v.includes('-face') ? 1400 : 1600}.webp`;
+    const cap = `${pat.name} · ${cw.name}`;
+    return { d, c: col, ar: 1, cap, dot: `background: ${cw.hex}`, link: `/lookbook/bath/${pat.slug}/?c=${cw.key}`,
+      cover: { pic: cw.fold, alt: `${pat.name} ${cw.name} towel, folded` },
+      views: [...own.map((v) => ({ href: big(v), cap: `${c.name} · ${cap}` })), ...(shoot ?? []).map((q) => ({ href: full.get(q)!, cap: `${c.name} · ${capOf(q)}` }))] };
+  })),
+  ...groupsOf.map((g) => {
+    const close = towelFirst && g.every((p) => p.person) ? closeupOf(g[0].col, g[0].style) : undefined;
+    const coverImg = close ?? g[0].src;
+    return { d: g[0].style, c: g[0].col, ar: coverImg.width / coverImg.height, cap: capOf(g[0]), dot: chip(colOf(g[0].col)),
+      cover: { img: coverImg, alt: `${c.one}, ${capOf(g[0]).toLowerCase()}` },
+      views: [...(close ? [{ href: close.src, cap: `${c.name} · ${capOf(g[0])}` }] : []), ...g.map((q) => ({ href: full.get(q)!, cap: `${c.name} · ${capOf(q)}` }))] };
+  }),
+];
+const SHOW = 24; // photos shown before "Show more"
 
 // Hotel shades offered as a starting point, light to dark by family; the last button opens the full picker.
 const shades: [string, string][] = [
@@ -54,49 +77,46 @@ const shades: [string, string][] = [
     <header class="room__head">
       <nav class="crumbs" aria-label="Breadcrumb"><a href="/lookbook/">Lookbook</a><span>/</span>{c.name}</nav>
       <h1>{c.name}</h1>
-      <nav class="cols" aria-label="Sections">
-        {groups.map((g) => <a href={`#${g.id}`}>{g.hex && <i style={chip(g)}></i>}{g.name}</a>)}
-        <a href="#own" class="cols__own"><i></i>Your colour</a>
-      </nav>
+      <a class="room__own" href="#own">Made in your colour</a>
     </header>
 
-    {asFlow && (
-      <div class="gal gal--flow" data-gallery data-justify>
-        {flow.map(({ p, g, st, first }) => (
-          <a class="tile" id={first ? g.id : undefined} href={full.get(p)} data-full data-cap={`${c.name} · ${label(g, st)}`} data-ar={(p.src.width / p.src.height).toFixed(4)}>
-            <span class="tile__img" style={`aspect-ratio: ${p.src.width} / ${p.src.height}`}>
-              <Image src={p.src} alt={`${c.one}, ${label(g, st).toLowerCase()}`} widths={[400, 800, 1200]} sizes="(max-width: 640px) 60vw, 34vw" loading="lazy" />
-            </span>
-            <span class="tile__cap" title={label(g, st)}>{g.hex && <i style={chip(g)}></i>}{short(g, st)}</span>
-          </a>
-        ))}
-      </div>
-    )}
-
-    {!asFlow && groups.map((g) => (
-      <section class="grp" id={g.id}>
-        <div class="grp__head">
-          <h2>{g.hex && <i style={chip(g)}></i>}{g.name}</h2>
-          {g.styles.length > 1 && <span>{g.styles.length} styles</span>}
-        </div>
-        {blocks(g).map((st) => (
-          <div class="sty" data-grp>
-            {g.styles.length > 1 && <h3 class="sty__h">{st.name}</h3>}
-            <div class="gal" data-gallery data-justify>
-              {st.photos.map(({ p, tag }, i) => (
-                <a class="tile" href={full.get(p)} data-full data-cap={`${c.name} · ${g.name} · ${tag || st.name}`} data-ar={(p.src.width / p.src.height).toFixed(4)} hidden={i >= SHOW}>
-                  <span class="tile__img" style={`aspect-ratio: ${p.src.width} / ${p.src.height}`}>
-                    <Image src={p.src} alt={`${c.one}, ${(tag || st.name).toLowerCase()} in ${g.name.toLowerCase()}`} widths={[400, 800, 1200]} sizes="(max-width: 640px) 60vw, 34vw" loading="lazy" />
-                  </span>
-                  {tag && <span class="tile__cap">{tag}</span>}
-                </a>
-              ))}
+    <section class="lf" data-lf data-page={SHOW}>
+      {(
+        <div class="lf__bar" role="toolbar" aria-label="Filter the photos">
+          {styles.length > 1 && (
+            <div class="lf__group" data-lf-key="d">
+              <button type="button" class="on" data-v="all">All designs</button>
+              {styles.map((st) => <button type="button" data-v={st}>{DESIGN_NAMES[st]}</button>)}
             </div>
-            {st.photos.length > SHOW && <button class="more" data-more>Show all</button>}
+          )}
+          {colours.length > 1 && (
+            <div class="lf__group" data-lf-key="c">
+              <button type="button" class="on" data-v="all">All colours</button>
+              {colours.map((col) => <button type="button" class="dot" data-v={col.id} style={chip(col).replace('background', '--chip')} aria-label={col.name} title={col.name}></button>)}
+            </div>
+          )}
+          <a class="lf__custom" href="#own" title="Customise (coming soon)">Customise</a>
+        </div>
+      )}
+      <div class="gal gal--flow" data-justify data-lf-items>
+        {tiles.map((t, i) => (
+          <div class="tile" data-gallery data-ar={t.ar.toFixed(4)} data-d={t.d} data-c={t.c} hidden={i >= SHOW}>
+            <a class="tile__img" href={t.views[0].href} data-full data-cap={t.views[0].cap} style={`aspect-ratio: ${t.ar}`}>
+              {t.cover.img
+                ? <Image src={t.cover.img} alt={t.cover.alt} widths={[400, 800, 1200]} sizes="(max-width: 640px) 60vw, 34vw" loading="lazy" />
+                : <Pic src={t.cover.pic!} alt={t.cover.alt} sizes="(max-width: 640px) 60vw, 25vw" />}
+              {t.views.length > 1 && <span class="tile__more" aria-hidden="true">More views</span>}
+            </a>
+            {t.views.slice(1).map((v) => <a class="tile__extra" href={v.href} data-full data-cap={v.cap} aria-label="Another view"></a>)}
+            <span class="tile__row">
+              {t.link ? <a class="tile__cap" href={t.link} title={t.cap}><i style={t.dot}></i>{t.cap}</a> : <span class="tile__cap" title={t.cap}><i style={t.dot}></i>{t.cap}</span>}
+              <a class="tile__custom" href="#own" title="Customise (coming soon)">Customise</a>
+            </span>
           </div>
         ))}
-      </section>
-    ))}
+      </div>
+      <button class="more" type="button" data-lf-more hidden={tiles.length <= SHOW}>Show more</button>
+    </section>
   </section>
 
   <section class="own" id="own" data-own data-cat={c.id} data-cat-name={c.name}>
@@ -151,6 +171,36 @@ const shades: [string, string][] = [
   .cols a { display: inline-flex; align-items: center; gap: 8px; font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .08em; text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; }
   .cols a:hover { border-bottom-color: var(--accent); }
   .cols i, .grp h2 i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+  /* Filter bar, as on the old Designer grid: designs as pills, colours as dots. */
+  .lf { margin-top: clamp(30px, 4vw, 50px); }
+  .lf + .lf { margin-top: clamp(50px, 7vw, 90px); }
+  .lf .gal--flow { margin-top: 0; }
+  .lf__title { font-size: clamp(28px, 3vw, 42px); margin: 0 0 18px; }
+  .lf__bar { position: sticky; top: 92px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding: 14px 18px; margin-bottom: clamp(22px, 3vw, 36px);
+    border: 1px solid var(--line); border-radius: 18px; background: color-mix(in srgb, var(--ground) 90%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .lf__group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .lf__group button { padding: .5em 1em; border-radius: 999px; border: 1px solid transparent; background: none; color: var(--ink); cursor: pointer;
+    font: 600 18px var(--fl); letter-spacing: .03em; transition: background .3s, border-color .3s, color .3s; }
+  .lf__group button:hover { border-color: var(--line); }
+  .lf__group button.on { background: var(--primary); color: var(--ground); }
+  .lf__group .dot { width: 30px; height: 30px; padding: 0; border-radius: 50%; background: var(--chip, var(--c)); position: relative;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.12), inset 0 -3px 6px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.12); transition: transform .25s; }
+  .lf__group .dot:hover { transform: scale(1.12); }
+  .lf__group .dot.on { background: var(--chip, var(--c)); }
+  .lf__group .dot.on::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1.5px solid var(--primary); }
+  .lf__group button.off { opacity: .28; }
+  /* Customise: a placeholder for now; it takes you to "Made in your colour". */
+  .lf__custom { margin-left: auto; padding: .45em 1.2em; border: 1px dashed var(--accent); border-radius: 999px; text-decoration: none; color: var(--ink); font: 600 18px var(--fl); letter-spacing: .06em; }
+  .lf__custom:hover { background: var(--accent); color: #fff; border-style: solid; }
+  .tile__img { position: relative; cursor: zoom-in; }
+  .tile__img :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .tile__extra { display: none; }
+  .tile__more { position: absolute; right: 10px; bottom: 10px; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.88); color: var(--ink); font: 600 11px var(--fb); letter-spacing: .12em; text-transform: uppercase; opacity: 0; transition: opacity .3s; }
+  .tile:hover .tile__more { opacity: 1; }
+  .tile__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px 10px; min-width: 0; flex-wrap: wrap; }
+  .tile__custom { flex: none; padding: 3px 10px; border: 1px dashed color-mix(in srgb, var(--accent) 80%, transparent); border-radius: 999px; font: 600 11px var(--fb); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; color: var(--lab); }
+  .tile__custom:hover { border-style: solid; background: var(--accent); color: #fff; }
+  .room__own { font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 4px; margin-top: 16px; display: inline-block; }
   .cols__own i { background: conic-gradient(#c9a227, #a8553a, #6d2235, #56708f, #8fa98a, #c9a227); }
   .grp { padding-top: clamp(44px, 5vw, 70px); scroll-margin-top: 100px; }
   .grp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
@@ -168,12 +218,12 @@ const shades: [string, string][] = [
   /* Justified rows: every photo whole, in its own shape; the script sets widths so each row fills the line. */
   .gal { display: flex; flex-wrap: wrap; gap: 12px; }
   .gal--flow { gap: 26px 12px; margin-top: clamp(36px, 4vw, 56px); }
-  .tile { display: flex; flex-direction: column; gap: 10px; width: calc(25% - 9px); cursor: zoom-in; text-decoration: none; color: var(--ink); scroll-margin-top: 110px; }
+  .tile { display: flex; flex-direction: column; gap: 10px; width: calc(25% - 9px); text-decoration: none; color: var(--ink); scroll-margin-top: 110px; }
   .tile__img { display: block; overflow: hidden; background: var(--tint); }
   .tile__img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
-  .tile:hover img { transform: scale(1.03); }
-  .tile__cap { display: flex; align-items: center; gap: 8px; min-width: 0; font: var(--flst) var(--flw) 13px var(--fl); letter-spacing: .1em; text-transform: uppercase; color: var(--lab); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tile__cap i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+  .tile__img:hover img { transform: scale(1.03); }
+  .tile__cap { display: flex; align-items: center; gap: 8px; min-width: 0; font: 600 15px var(--fl); letter-spacing: .1em; text-transform: uppercase; color: var(--lab); white-space: normal; text-decoration: none; }
+  .tile__cap i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); flex: none; }
 
   /* Made in your colour */
   .own { background: var(--ground); border-block: 1px solid var(--line); padding: clamp(60px, 8vw, 110px) 0; scroll-margin-top: 84px; }
@@ -267,12 +317,36 @@ const shades: [string, string][] = [
   // Rows sized to the screen: taller on desktop, shorter on phones.
   const relayout = justifyAll('[data-justify]', { target: () => (innerWidth > 1100 ? 360 : innerWidth > 640 ? 290 : 230), maxPerRow: () => (innerWidth > 640 ? 5 : 2) });
 
-  // Each colour shows its first tiles; "Show all" reveals the rest.
-  document.querySelectorAll<HTMLButtonElement>('[data-more]').forEach((b) => b.addEventListener('click', () => {
-    const grp = b.closest('[data-grp]')!;
-    grp.querySelectorAll<HTMLElement>('.gal > [hidden]').forEach((el) => (el.hidden = false));
-    relayout(grp.querySelector<HTMLElement>('.gal')!);
-    b.remove();
-  }));
-
+  // Filter bars: narrow the items by design (data-d) and colour (data-c). Photo galleries show a page at a time.
+  document.querySelectorAll<HTMLElement>('[data-lf]').forEach((box) => {
+    const items = [...box.querySelectorAll<HTMLElement>('[data-lf-items] > [data-d]')];
+    const gal = box.querySelector<HTMLElement>('[data-justify]');
+    const more = box.querySelector<HTMLButtonElement>('[data-lf-more]');
+    const page = Number(box.dataset.page) || Infinity;
+    const f: Record<string, string> = { d: 'all', c: 'all' };
+    let limit = page;
+    const apply = () => {
+      const match = items.filter((el) => (f.d === 'all' || el.dataset.d === f.d) && (f.c === 'all' || el.dataset.c === f.c));
+      items.forEach((el) => (el.hidden = true));
+      match.slice(0, limit).forEach((el) => (el.hidden = false));
+      if (more) more.hidden = match.length <= limit;
+      if (gal) relayout(gal);
+      // Dim the options that would show nothing with the other filter as it is.
+      box.querySelectorAll<HTMLElement>('[data-lf-key]').forEach((g) => {
+        const key = g.dataset.lfKey!, other = key === 'd' ? 'c' : 'd';
+        g.querySelectorAll<HTMLButtonElement>('button[data-v]:not([data-v="all"])').forEach((b) => {
+          b.classList.toggle('off', !items.some((el) => el.dataset[key] === b.dataset.v && (f[other] === 'all' || el.dataset[other] === f[other])));
+        });
+      });
+    };
+    box.querySelectorAll<HTMLElement>('[data-lf-key]').forEach((g) => g.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (!b) return;
+      g.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+      f[g.dataset.lfKey!] = b.dataset.v!;
+      limit = page;
+      apply();
+    }));
+    more?.addEventListener('click', () => { limit += page; apply(); });
+  });
 </script>

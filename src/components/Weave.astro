@@ -25,7 +25,7 @@ const scenes = [
     alt: 'Smiling model holding four rolled Emsworth towels in kraft and white belly bands',
     label: 'Presentation', h: 'The grammar<br/><em>of fabric.</em>',
     p: 'Rolled, banded and labelled as it arrives at your property: kraft belly bands, woven labels and gift boxes to your own artwork.',
-    cta: ['Packaging & branding', '/designer/#studio'] },
+    cta: ['Packaging & branding', '/about/#pack'] },
 ];
 ---
 <section class="weave" id="colour" data-weave>
@@ -67,13 +67,19 @@ const scenes = [
   .weave__face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--fx); }
   .weave__face--hug { background: #cecbcb; }
   .weave__face--rolls { background: radial-gradient(90% 100% at 72% 45%, #c7c5c5, #bdbab9 70%, #b5b2b1); }
-  .weave__face--rolls img { left: 50%; width: 50%; object-position: var(--fx);
+  /* Desktop: the photo stands at full height against the right edge, pushed a little past it, so the person sits in the
+     right part of the screen; its left edge fades into the studio grey behind the words. */
+  @media (min-width: 761px) {
+    .weave__face--smile img, .weave__face--hug img { left: auto; right: calc(max(100svh, 560px) * -0.12); width: calc(max(100svh, 560px) * 1.5);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%); mask-image: linear-gradient(90deg, transparent 0, #000 22%); }
+  }
+  .weave__face--rolls img { left: 56%; width: 44%; object-position: var(--fx);
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 88%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 88%, transparent 100%); }
 
-  .weave__copy { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; gap: 18px; justify-items: start; pointer-events: none; }
-  .weave__copy > * { max-width: 470px; pointer-events: auto; }
-  .weave__copy > p { max-width: 400px; margin: 0; font-size: clamp(17px, 1.4vw, 20px); color: var(--ink); }
-  .weave__copy h2 { font-size: clamp(46px, 5.6vw, 84px); line-height: 1.02; }
+  .weave__copy { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; padding-top: clamp(60px, 12vh, 140px); gap: 18px; justify-items: start; pointer-events: none; }
+  .weave__copy > * { max-width: 620px; pointer-events: auto; }
+  .weave__copy > p { max-width: 520px; margin: 0; font-size: clamp(18px, 1.65vw, 24px); color: var(--ink); }
+  .weave__copy h2 { font-size: clamp(50px, 6.8vw, 108px); line-height: 1.02; }
   .weave__copy .label { color: color-mix(in srgb, var(--lab) 80%, #000); }
 
   .weave__count { position: absolute; z-index: 3; right: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); bottom: clamp(28px, 5vh, 52px); margin: 0;
@@ -128,7 +134,7 @@ const scenes = [
         .to(fold, { autoAlpha: 1, duration: 0.8, ease: 'power1.inOut' }, '<0.05')
         .to(fold.querySelector('img'), { scale: 1, duration: 1, ease: 'power2.out' }, '<')
         .to(folds[i].querySelector('img'), { scale: 0.97, duration: 0.8, ease: 'power1.inOut' }, '<')
-        .to(copies[i + 1], { autoAlpha: 1, y: 0, duration: 0.35, ease: 'power2.out' }, '-=0.25')
+        .to(copies[i + 1], { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' }, '<0.3')
         .to({}, { duration: 0.35 });
     });
     ScrollTrigger.create({

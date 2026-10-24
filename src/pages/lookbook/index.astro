@@ -1,38 +1,73 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
+import LookbookWheel from '../../components/LookbookWheel.jsx';
 import Base from '../../layouts/Base.astro';
 import { pick } from '../../data/shoot';
 import { CATEGORIES, tagged } from '../../data/colours';
 
 // The lookbook: one photograph per product, each shown whole in its own shape; rows are scaled to fill the width (see justify.ts).
 const items = CATEGORIES.map((c) => ({ ...c, n: tagged.filter((p) => p.cat === c.id).length, img: pick(...c.cover) }));
-if (items.reduce((n, c) => n + c.n, 0) !== tagged.length) throw new Error('Lookbook products do not cover every photo');
+// Packaging photos live on the About page (How we pack), not in the lookbook.
+if (items.reduce((n, c) => n + c.n, 0) !== tagged.filter((p) => p.cat !== 'packaging').length) throw new Error('Lookbook products do not cover every photo');
+// The same products for the depth carousel at the top.
+const depthItems = await Promise.all(items.map(async (c) => ({ id: c.id, name: c.name, href: `/lookbook/${c.id}/`, focus: c.focus ?? '50% 30%', ar: +(c.img.width / c.img.height).toFixed(4),
+  image: (await getImage({ src: c.img, width: 1400, format: 'webp' })).src })));
 ---
 <Base title="Lookbook · Emsworth Hospitality"
   description={`The Emsworth lookbook: bathrobes, towels, bath mats, slippers, bed and table linen.`}>
   <section class="looks wrap">
     <header class="looks__head">
-      <span class="label">The lookbook</span>
-      <h1>Choose a <em>product.</em></h1>
+      <h1 class="label">The lookbook</h1>
+      <a class="looks__switch" href="/lookbook/products/">Products <span aria-hidden="true">→</span></a>
     </header>
 
-    <div class="rows" data-rows>
-      {items.map((c, i) => (
-        <a class="card" href={`/lookbook/${c.id}/`} data-ar={(c.img.width / c.img.height).toFixed(4)}>
-          <span class="card__img" style={`aspect-ratio: ${c.img.width} / ${c.img.height}`}>
-            <Image src={c.img} alt="" widths={[480, 800, 1400]} sizes="(max-width: 640px) 60vw, 40vw" loading={i < 4 ? 'eager' : 'lazy'} />
-          </span>
-          <span class="card__cap"><b>{c.name}</b><small>View</small></span>
-        </a>
-      ))}
-    </div>
+    <LookbookWheel client:only="react" items={depthItems} />
+
   </section>
 </Base>
 
 <style>
-  .looks { padding-top: clamp(36px, 5vw, 70px); padding-bottom: 110px; }
-  .looks__head { margin-bottom: 34px; }
-  .looks h1 { font-size: clamp(38px, 5vw, 68px); margin: 10px 0 0; }
+  .looks { padding-top: 18px; padding-bottom: 0; }
+  .looks__head { margin-bottom: 10px; }
+  .looks__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .looks__switch { padding: 8px 18px; border: 1px solid var(--accent); border-radius: 999px; text-decoration: none; color: var(--primary);
+    font: 600 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; transition: background .3s, color .3s; }
+  .looks__switch:hover { background: var(--primary); border-color: var(--primary); color: var(--ground); }
+
+  .looks .looks__head h1 { margin: 0; font: 600 22px/34px var(--fl); letter-spacing: .2em; text-transform: uppercase; color: var(--lab); }
+  /* Option wheel: names on the left, the chosen product's photograph on the right; one screen tall. */
+  /* Exactly the screen below the header: label, then wheel and photo; the photo runs to the right edge. */
+  :global(.lbw) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 3.5vw, 56px); height: calc(100svh - 84px - 18px - 34px - 66px); min-height: 440px; margin-bottom: 0; }
+  :global(.lbw__wheel) { position: relative; min-height: 0; display: grid; grid-template-rows: 1fr auto; }
+  :global(.lbw__wheel .option-wheel) { font-family: var(--fd); -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent); }
+  :global(.lbw__wheel .option-wheel__item) { font-weight: 400; }
+  :global(.lbw__wheel .option-wheel__item--selected) { font-weight: 500; font-style: italic; }
+  :global(.lbw__open) { justify-self: start; font: 600 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 3px; }
+  /* The photographs: the ReactBits Depth Carousel, cards stepping back to the right. */
+  :global(.lbw__depth) { position: relative; min-height: 0; }
+  :global(.lbw__depth .depth-carousel) { position: absolute; inset: 0; min-height: 0; }
+  :global(.lbw__depth .depth-carousel__card) { background: #fff; }
+  :global(.lbw__name) { position: absolute; z-index: 3; right: 0; bottom: -2px; translate: 0 100%; padding-top: 6px; font: 600 12px var(--fl); letter-spacing: .2em;
+    text-transform: uppercase; color: var(--lab); animation: lbwName .8s .3s both; }
+  @keyframes lbwName { from { opacity: 0; transform: translateY(-6px); } }
+  :global(.lbw__wheel .option-wheel__item) { transform-origin: left center; }
+  @media (max-width: 760px) {
+    :global(.lbw) { grid-template-columns: 1fr; grid-template-rows: 46svh 1fr; height: calc(100svh - 70px - 70px); margin-right: 0; }
+    :global(.lbw__depth) { grid-row: 1; }
+  }
+  /* Depth carousel: the product cards stacked away into the page; the one in front is named underneath. */
+  :global(.lbd) { display: grid; gap: 10px; margin-bottom: clamp(60px, 8vw, 110px); }
+  :global(.lbd__stage) { position: relative; height: calc(100svh - 84px - 260px); min-height: 380px; max-height: 620px; }
+  @media (max-width: 760px) { :global(.lbd__stage) { height: 380px; } }
+  :global(.lbd__stage .depth-carousel) { position: absolute; inset: 0; }
+  :global(.lbd__stage .depth-carousel__arrow) { background: color-mix(in srgb, var(--primary) 70%, transparent); }
+  :global(.lbd__cap) { display: flex; align-items: baseline; justify-content: center; gap: 18px; }
+  :global(.lbd__n) { font: 600 13px var(--fb); letter-spacing: .2em; color: var(--lab); }
+  :global(.lbd__cap h2) { margin: 0; font-size: clamp(32px, 3.4vw, 50px); animation: lbdIn .5s cubic-bezier(.2,.7,.2,1); }
+  :global(.lbd__open) { font: 600 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 3px; }
+  @keyframes lbdIn { from { opacity: 0; transform: translateY(10px); } }
+  .looks__all { font-size: clamp(26px, 2.6vw, 38px); margin: 0 0 22px; }
+  .looks h1 { font-size: clamp(36px, 4vw, 58px); margin: 6px 0 0; }
 
   /* Each photo whole, in its own shape; the script sets widths so every row fills the line. */
   .rows { display: flex; flex-wrap: wrap; gap: clamp(28px, 3vw, 44px) clamp(14px, 1.6vw, 24px); }
@@ -55,8 +90,3 @@ if (items.reduce((n, c) => n + c.n, 0) !== tagged.length) throw new Error('Lookb
   }
 </style>
 
-<script>
-  import { justifyAll } from '../../scripts/justify';
-  // Row height to aim for: tall on desktop, shorter on phones; at most three products to a row (two on a phone).
-  justifyAll('[data-rows]', { target: () => (innerWidth > 1100 ? 440 : innerWidth > 640 ? 340 : 250), maxPerRow: () => (innerWidth > 640 ? 3 : 2) });
-</script>

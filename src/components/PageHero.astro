@@ -2,21 +2,24 @@
 // Inner-page opening: image with framed title (Heritage) or colour panel beside it (Split).
 // `image` is a shoot photo, or a path under /images/ (the main site's banners, served as -800/-1600/-2400.webp).
 import { Image } from 'astro:assets';
-interface Props { image: ImageMetadata | string; alt: string; kicker: string; title: string; intro?: string; focus?: string; crumbs?: [string, string][]; whole?: boolean }
-const { image, alt, kicker, title, intro, focus = '50% 50%', crumbs = [], whole = false } = Astro.props;
+type Tune = { z: number; px: number; py: number; tx: number; ty: number; tw: number; ts: number };
+interface Props { image: ImageMetadata | string; alt: string; kicker: string; title: string; intro?: string; focus?: string; crumbs?: [string, string][]; whole?: boolean; plain?: boolean; class?: string; tune?: Tune;
+  right?: { shift: number; fill: string; fade?: number } }
+const { image, alt, kicker, title, intro, focus = '50% 50%', crumbs = [], whole = false, plain = false, right, class: extra, tune } = Astro.props;
 // `whole`: show the entire photo, in any theme. A landscape photo fills the width at its own height; a portrait one
 // gets a column exactly its shape beside the text, so nothing (and no face) is cropped.
 const ar = typeof image === 'string' ? 1.5 : image.width / image.height;
 const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port') : '';
+const vars = [`--ar: ${ar.toFixed(4)}`, right ? `--shift: ${right.shift}; --fill: ${right.fill}; --fade: ${(right.fade ?? 0.22) * 100}%` : '', tune ? `--z: ${tune.z}; --px: ${tune.px}; --py: ${tune.py}; --tx: ${tune.tx}%; --ty: ${tune.ty}%; --tw: ${tune.tw}px; --ts: ${tune.ts}` : ''].filter(Boolean).join('; ');
 ---
-<section class:list={['ph', wholeCls]} style={whole ? `--ar: ${ar.toFixed(4)}` : undefined}>
-  <div class="ph__img inset">
+<section class:list={['ph', wholeCls, right && 'ph--right', plain && 'ph--plain', extra]} style={vars || undefined} data-hero data-tuned={tune ? '' : undefined}>
+  <div class="ph__img inset" data-tune-img-box>
     {typeof image === 'string'
-      ? <img src={`/images/${image}-1600.webp`} srcset={[800, 1600, 2400].map((w) => `/images/${image}-${w}.webp ${w}w`).join(', ')} sizes="100vw" alt={alt} loading="eager" fetchpriority="high" style={`object-position:${focus}`} />
-      : <Image src={image} alt={alt} widths={[640, 1100, 1700]} sizes="100vw" loading="eager" fetchpriority="high" style={`object-position:${focus}`} />}
+      ? <img src={`/images/${image}-1600.webp`} srcset={[800, 1600, 2400].map((w) => `/images/${image}-${w}.webp ${w}w`).join(', ')} sizes="100vw" alt={alt} data-tune-img loading="eager" fetchpriority="high" style={`object-position:${focus}`} />
+      : <Image src={image} alt={alt} widths={[640, 1100, 1700, 2400, 2900].filter((w) => w <= image.width).concat(image.width < 2900 && image.width > 1700 ? [image.width] : [])} quality={88} sizes="100vw" data-tune-img loading="eager" fetchpriority="high" style={`object-position:${focus}`} />}
   </div>
   <div class="ph__panel">
-    <div class="ph__in">
+    <div class="ph__in" data-tune-text>
       {crumbs.length > 0 && (
         <nav class="ph__crumbs" aria-label="Breadcrumb">{crumbs.map(([t, h]) => <a href={h}>{t}</a>)}</nav>
       )}
@@ -77,6 +80,30 @@ const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port')
   :global(html) .ph--port .ph__img::before { background: linear-gradient(180deg, color-mix(in srgb, var(--dark) 55%, transparent), transparent 22%); }
   :global(html) .ph--port .ph__panel { grid-column: 1; grid-row: 1; margin: 0; align-items: center; padding: 110px clamp(20px, 3vw, 48px) 40px max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
   :global(html) .ph--port .ph__img.inset::after, :global(html) .ph--land .ph__img.inset::after { display: none; }
+  /* `right`: on desktop the photo is pinned to the right at full height (pushed `shift` of its width past the edge) so the
+     subject sits in the right third, and its left edge fades into `fill`, the photo's own edge colour. No dark wash. */
+  @media (min-width: 821px) {
+    :global(html) .ph.ph--right { height: max(100svh, 560px); min-height: 0; }
+    :global(html) .ph.ph--right .ph__img { background: var(--fill); }
+    :global(html) .ph.ph--right .ph__img::before { display: none; }
+    :global(html) .ph.ph--right .ph__img img { left: auto; right: calc(max(100svh, 560px) * var(--ar) * var(--shift) * -1); width: calc(max(100svh, 560px) * var(--ar)); height: 100%;
+      object-fit: cover; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade)); mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade)); }
+    :global(html) .ph.ph--right h1, :global(html) .ph.ph--right p, :global(html) .ph.ph--right .label, :global(html) .ph.ph--right .ph__crumbs { text-shadow: 0 2px 22px rgba(0, 0, 0, .28); }
+  }
+  /* `plain`: the whole photo, edge to edge, with no colour wash, as on the homepage. The hero is as tall as the photo
+     needs to show it uncropped at full width (never less than a screen). */
+  @media (min-width: 601px) {
+    :global(html) .ph.ph--plain { display: grid; grid-template-columns: 1fr; height: max(100svh, calc(100vw / var(--ar))); min-height: 0; background: var(--dark); }
+    :global(html) .ph.ph--plain .ph__img { position: absolute; inset: 0; grid-column: auto; grid-row: auto; min-height: 0; }
+    :global(html) .ph.ph--plain .ph__panel { grid-column: 1; grid-row: 1; margin: 0 auto; padding-left: var(--gutter); }
+    :global(html) .ph.ph--plain .ph__img::before, :global(html) .ph.ph--plain .ph__img.inset::after { display: none; }
+    :global(html) .ph.ph--plain .ph__panel { align-items: center; }
+    /* Text stays in the left third, on the wall, clear of the person in the middle of the photo. */
+    :global(html) .ph.ph--plain .ph__in { max-width: min(440px, 32vw); }
+    :global(html) .ph.ph--plain h1 { font-size: clamp(40px, 4.4vw, 76px); }
+    :global(html) .ph.ph--plain p { font-size: clamp(15px, 1.2vw, 18px); }
+    :global(html) .ph.ph--plain h1, :global(html) .ph.ph--plain p, :global(html) .ph.ph--plain .label { text-shadow: 0 2px 24px rgba(0, 0, 0, .35); }
+  }
   @media (max-width: 820px) {
     :global(html) .ph--port { grid-template-columns: 1fr; height: auto; }
     :global(html) .ph--port .ph__img { grid-row: 1; aspect-ratio: var(--ar); max-height: 80svh; }

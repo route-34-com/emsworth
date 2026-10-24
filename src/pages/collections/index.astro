@@ -1,6 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
+import heroes from '../../data/heroes.json';
 import PageHero from '../../components/PageHero.astro';
+import collectionsHero from '../../assets/hero/collections-sit.jpg';
 import { getImage } from 'astro:assets';
 import { collections } from '../../data/catalogue';
 import { CATEGORIES, tagged } from '../../data/colours';
@@ -25,7 +27,7 @@ const cards = await Promise.all(collections.map(async (c) => {
 ---
 <Base title="Collections · Emsworth Hospitality" overHero
   description="Bath, bed, table, pool and spa linen, robes and slippers for hotels: catalogue specifications, sizes, MOQs and lead times.">
-  <PageHero image={pick('outdoor/s3', 'j8a1318-edit')} alt="Guest in a green head towel holding a banded Emsworth towel, beside rolled towels on a lounge chair" focus="50% 12%" whole
+  <PageHero tune={(heroes as any).collections} image={collectionsHero} alt="Guest in a green head towel holding a banded Emsworth towel, beside rolled towels on a lounge chair" focus="50% 0%" plain
     kicker="The collections" title="Every textile<br/><em>a guest touches.</em>"
     intro="Five collections with full catalogue specifications. Every article can be built to your own dimension, border, colour and branding." />
 
@@ -39,7 +41,7 @@ const cards = await Promise.all(collections.map(async (c) => {
       <div class="sec__head reveal">
         <span class="label">Every product</span>
         <h2>Robes to glass cloths, <em>in full colour.</em></h2>
-        <p class="lead">Bathrobes, towels, bath mats, slippers, bed and table linen, glass cloths, uniform shirts and packaging. Choose one to see every photograph of it.</p>
+        <p class="lead">Bathrobes, towels, bath mats, slippers, bed and table linen, glass cloths and uniform shirts. Choose one to see every photograph of it.</p>
       </div>
       <ProductShowcase client:only="react" items={products} modes={["orbit"]} />
     </div>

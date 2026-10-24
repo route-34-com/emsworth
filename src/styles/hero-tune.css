@@ -1,0 +1,19 @@
+/* Hero placement set in the hero editor (/hero-editor/, saved to src/data/heroes.json). Desktop only; phones keep their own layout.
+   The hero is one screen tall. The photo is drawn at --z times the size that just covers it, and --px/--py (0 to 1) slide it
+   across whatever overflows, so it can never leave a gap. The text block sits at --tx/--ty (% of the hero), --tw wide, scaled by --ts. */
+@media (min-width: 821px) {
+  [data-tuned] { height: max(100svh, 560px) !important; min-height: 0 !important; container-type: size; }
+  [data-tuned] [data-tune-img] {
+    --iw: calc(max(100cqw, 100cqh * var(--ar)) * var(--z));
+    position: absolute !important; inset: auto !important; max-width: none !important; object-fit: fill !important;
+    width: var(--iw) !important; height: calc(var(--iw) / var(--ar)) !important;
+    left: calc((100cqw - var(--iw)) * var(--px)) !important; top: calc((100cqh - var(--iw) / var(--ar)) * var(--py)) !important;
+  }
+  [data-tuned] [data-tune-img-box] { position: absolute !important; inset: 0 !important; overflow: hidden; }
+  [data-tuned] [data-tune-text] {
+    position: absolute !important; z-index: 4; left: var(--tx) !important; top: var(--ty) !important; right: auto !important; bottom: auto !important;
+    translate: none !important; margin: 0 !important; width: var(--tw) !important; max-width: none !important;
+    transform: scale(var(--ts)); transform-origin: 0 0;
+  }
+  [data-tuned] .ph__panel { position: static !important; padding: 0 !important; }
+}

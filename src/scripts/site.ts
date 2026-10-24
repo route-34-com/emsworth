@@ -72,7 +72,7 @@ const show = (i: number) => {
   const a = set[at];
   lbImg.src = a.href;
   lbImg.alt = a.querySelector('img')?.alt || '';
-  lbCap.textContent = `${a.dataset.cap || ''} · ${at + 1} / ${set.length}`;
+  lbCap.textContent = a.dataset.cap || ''; // never a photo count
 };
 document.addEventListener('click', (e) => {
   const a = (e.target as Element).closest<HTMLAnchorElement>('[data-gallery] a[data-full]');
@@ -114,7 +114,7 @@ $$<HTMLElement>('[data-ds-group]').forEach((g) => g.addEventListener('click', (e
   const b = (e.target as Element).closest<HTMLButtonElement>('button[data-v]');
   if (!b) return;
   root.dataset[g.dataset.dsGroup!] = b.dataset.v!;
-  try { localStorage.setItem(DKEY, JSON.stringify({ palette: root.dataset.palette, type: root.dataset.type, theme: root.dataset.theme })); } catch { /* storage blocked */ }
+  try { localStorage.setItem(DKEY, JSON.stringify({ palette: root.dataset.palette })); } catch { /* storage blocked */ }
   paint();
 }));
 paint();

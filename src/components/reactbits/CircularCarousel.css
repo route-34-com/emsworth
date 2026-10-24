@@ -17,7 +17,7 @@
   touch-action: pan-x;
 }
 
-.circular-carousel[data-draggable] {
+.circular-carousel[data-draggable] .circular-carousel__card {
   cursor: grab;
 }
 
@@ -237,4 +237,8 @@
   .circular-carousel__title {
     animation: none;
   }
+}
+
+.circular-carousel[data-dragging] .circular-carousel__card {
+  cursor: grabbing;
 }

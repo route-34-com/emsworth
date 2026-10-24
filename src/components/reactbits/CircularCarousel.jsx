@@ -204,6 +204,8 @@ const CircularCarousel = ({
   captions = false,
   onChange,
   onItemClick,
+  index,
+  windowSize,
   className = '',
   style
 }) => {
@@ -293,7 +295,8 @@ const CircularCarousel = ({
     count,
     step,
     radius,
-    layout,
+    // Site change: `windowSize` narrows how much of the drum is shown, so the front card can be bigger.
+    layout: windowSize ? { ...layout, window: windowSize } : layout,
     axis,
     tilt: tiltValue,
     perspective: layout.inward ? radius : (perspective ?? layout.perspective),
@@ -695,6 +698,11 @@ const CircularCarousel = ({
     wakeRef.current();
   }, []);
 
+  // Site change: an outside control (the lookbook's option wheel) can spin a card to the front.
+  useEffect(() => {
+    if (typeof index === 'number' && index !== activeRef.current) focusIndex(index);
+  }, [index, focusIndex]);
+
   const stepBy = useCallback(delta => {
     const state = stateRef.current;
     const s = settingsRef.current;
@@ -729,7 +737,10 @@ const CircularCarousel = ({
   const handlePointerMove = event => {
     const state = stateRef.current;
     if (event.pointerType === 'mouse') {
-      state.pointer.inside = true;
+      // Hover (pause + tilt) only counts over a photo, not the empty space around the ring.
+      const onCard = !!(event.target && event.target.closest && event.target.closest('.circular-carousel__card'));
+      state.pointer.inside = onCard;
+      if (state.hover !== onCard) state.hover = onCard;
       updatePointer(event);
     }
     const press = state.press;
@@ -790,7 +801,6 @@ const CircularCarousel = ({
 
   const handlePointerEnter = event => {
     if (event.pointerType !== 'mouse') return;
-    stateRef.current.hover = true;
     wakeRef.current();
   };
 

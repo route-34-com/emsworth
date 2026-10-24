@@ -1,30 +1,12 @@
-@import '@fontsource/libre-caslon-display/400.css';
-@import '@fontsource/libre-caslon-text/400.css';
-@import '@fontsource/libre-caslon-text/400-italic.css';
-@import '@fontsource/libre-caslon-text/700.css';
-@import '@fontsource-variable/nunito-sans/index.css';
-@import '@fontsource/gloock/400.css';
-@import '@fontsource/bentham/400.css';
+@import '@fontsource/cormorant-garamond/400.css';
 @import '@fontsource/cormorant-garamond/500.css';
 @import '@fontsource/cormorant-garamond/500-italic.css';
-@import '@fontsource/bodoni-moda/400.css';
-@import '@fontsource/bodoni-moda/400-italic.css';
-@import '@fontsource/playfair-display/400.css';
-@import '@fontsource/playfair-display/400-italic.css';
-@import '@fontsource/mulish/400.css';
-@import '@fontsource/mulish/600.css';
-@import '@fontsource/mulish/700.css';
-@import '@fontsource/mulish/800.css';
-@import '@fontsource/mulish/900.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/700.css';
+@import '@fontsource-variable/nunito-sans/index.css';
 
-/* ---------- Palettes (data-palette on <html>) ---------- */
-:root, [data-palette='navy'] {
-  --dark: #0b1530; --primary: #1b2a4a; --accent: #b8975a; --ground: #faf7f0; --tint: #e9e4d8; --ink: #1f2633; --lab: #7a5f2c;
-}
-[data-palette='claret'] {
-  --dark: #2a0c12; --primary: #5c1a26; --accent: #b39260; --ground: #f8f2e8; --tint: #ecdfcc; --ink: #2e2522; --lab: #6e4e22;
-}
-[data-palette='navybeige'] {
+/* ---------- Palettes (data-palette on <html>): Navy, Beige & Gold (default) or Teal & Sand ---------- */
+:root, [data-palette='navybeige'] {
   --dark: #141c30; --primary: #1f2a44; --accent: #c6a75e; --ground: #f6efe4; --tint: #e8dcc8; --ink: #1f2a44; --lab: #86692c;
 }
 
@@ -33,40 +15,16 @@
   --dark: #072826; --primary: #0c3c3a; --accent: #c6a57a; --ground: #ffede0; --tint: #f7decb; --ink: #0c3c3a; --lab: #8a6a3c;
 }
 
-/* ---------- Typefaces (data-type) ---------- */
-:root, [data-type='caslon'] {
-  --fd: 'Libre Caslon Display', 'Libre Caslon Text', Georgia, serif; --fdw: 400;
-  --fl: 'Libre Caslon Text', Georgia, serif; --flst: italic; --flw: 400; --flsp: .2em;
-}
-[data-type='bentham'] {
-  --fd: 'Bentham', Georgia, serif; --fdw: 400;
-  --fl: 'Nunito Sans Variable', system-ui, sans-serif; --flst: normal; --flw: 700; --flsp: .2em;
-}
-[data-type='gloock'] {
-  --fd: 'Gloock', Georgia, serif; --fdw: 400;
-  --fl: 'Libre Caslon Text', Georgia, serif; --flst: italic; --flw: 400; --flsp: .2em;
-}
-[data-type='cormorant'] {
+/* ---------- Type: Cormorant Garamond for every word; the top menu alone is set in Nunito Sans bold (see Base.astro) ---------- */
+:root {
   --fd: 'Cormorant Garamond', Georgia, serif; --fdw: 500;
-  --fl: 'Cormorant Garamond', Georgia, serif; --flst: italic; --flw: 500; --flsp: .2em;
+  --fl: 'Cormorant Garamond', Georgia, serif; --flst: normal; --flw: 600; --flsp: .2em;
+  --fb: 'Cormorant Garamond', Georgia, serif;
+  --fmenu: 'Nunito Sans Variable', system-ui, sans-serif;
 }
-[data-type='bodoni'] {
-  --fd: 'Bodoni Moda', Georgia, serif; --fdw: 400;
-  --fl: 'Nunito Sans Variable', system-ui, sans-serif; --flst: normal; --flw: 700; --flsp: .2em;
-}
-[data-type='playfair'] {
-  --fd: 'Playfair Display', Georgia, serif; --fdw: 400;
-  --fl: 'Playfair Display', Georgia, serif; --flst: italic; --flw: 400; --flsp: .2em;
-}
-/* Mulish (as on the main-branch site): heavy, tightly set sans headings with the italic word in Cormorant Garamond. */
-[data-type='mulish'] {
-  --fd: 'Mulish', system-ui, sans-serif; --fdw: 800;
-  --fl: 'Mulish', system-ui, sans-serif; --flst: normal; --flw: 700; --flsp: .2em;
-}
-[data-type='mulish'] :is(h1, h2, h3) { letter-spacing: -.035em; }
-[data-type='mulish'] :is(h1, h2, h3) em { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; letter-spacing: -.01em; }
-:root { --fb: 'Nunito Sans Variable', system-ui, sans-serif; }
-[data-type='mulish'] { --fb: 'Mulish', system-ui, sans-serif; }
+
+/* Headings are drawn at the size they are set; only running text is adjusted. */
+h1, h2, h3, .hdr__nav a, .hdr__panel a, .hdr__quote, .hero__line, .ch__time b, .open__line, .night__word, .dusk p, .ch__ghost { font-size-adjust: none; }
 
 /* Headings that rise word by word (scripts/main-port.js wraps each word). */
 .split .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .06em .08em 0; margin: 0 -.06em -.08em 0; }
@@ -90,7 +48,9 @@
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
-  font: 400 17px/1.65 var(--fb); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  font: 500 17px/1.6 var(--fb); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  /* Cormorant's small letters are short; this sizes every running line and label up to read like a 19-20px text face. */
+  font-size-adjust: .47;
 }
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }

@@ -13,7 +13,7 @@
   --muted:color-mix(in srgb, var(--sand) 62%, transparent);
   --line:color-mix(in srgb, var(--sand) 18%, transparent);
   --serif:"Cormorant Garamond",Georgia,serif;
-  --sans:"Mulish",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --sans:"Cormorant Garamond",Georgia,serif;
   --ease:cubic-bezier(.22,1,.36,1)}
 .mb .eyebrow{font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:.7em;margin-bottom:1.6rem}
 .mb .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 0 color-mix(in srgb, var(--brass) 60%, transparent);animation:pulse 2.2s infinite}
@@ -188,7 +188,7 @@
 .mb a { color: inherit; text-decoration: none; }
 .mb button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 .mb img { display: block; max-width: 100%; }
-.mb h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(2.4rem, 6.2vw, 6rem); line-height: .98; letter-spacing: -.035em; color: inherit; }
+.mb h2 { font-family: var(--sans); font-weight: 500; font-size: clamp(2.4rem, 6.2vw, 6rem); line-height: .98; letter-spacing: -.035em; color: inherit; }
 .mb h3 { font-family: var(--sans); color: inherit; }
 .mb em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; }
 .mb h2 em { font-size: 1.08em; }

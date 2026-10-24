@@ -7,6 +7,9 @@ import DriftWall from '../components/reactbits/DriftWall.jsx';
 import { certifications, process } from '../data/catalogue';
 import { pick, inFolder } from '../data/shoot';
 
+// How we pack: banded rolls in the garden, the band, tag and card, and the shirt box.
+import rollsGarden from '../assets/hero/rolls-garden.jpg';
+const pack = [rollsGarden, pick('slipper-robe', 'j8a2550-edit'), pick('product-sku', 'j8a2310')];
 const outdoor = inFolder('outdoor', true).map((p) => p.src);
 const banners = inFolder('web-banner').map((p) => p.src);
 const wall = await Promise.all([...new Set([...outdoor, ...banners])].map(async (src) => ({ image: (await getImage({ src, width: 520, format: 'webp' })).src, title: '' })));
@@ -56,6 +59,23 @@ const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced resid
     </div>
   </section>
 
+  <!-- How we pack -->
+  <section class="sec sec--ground pack" id="pack">
+    <div class="wrap pack__grid">
+      <div class="reveal">
+        <span class="label">How we pack</span>
+        <h2>Rolled, banded, <em>ready for the room.</em></h2>
+        <p class="lead">Every piece leaves the mill folded or rolled, wrapped in a kraft or white belly band with your name on it, tagged with its care label and packed by room type, so housekeeping can put it straight into service.</p>
+        <ul class="pack__list">
+          <li><b>Belly bands</b>Kraft or white, printed with your logo</li>
+          <li><b>Swing tags &amp; cards</b>Care, composition and a thank-you note</li>
+          <li><b>Cartons</b>Packed and labelled by room type and floor</li>
+        </ul>
+      </div>
+      <div class="pack__pics reveal">{pack.map((src) => <span><Image src={src} alt="Emsworth packaging: belly bands, tags and rolled towels" widths={[500, 900, 1300]} sizes="(max-width: 860px) 45vw, 24vw" /></span>)}</div>
+    </div>
+  </section>
+
   <section class="sec">
     <div class="wrap">
       <div class="sec__head reveal"><span class="label">How a project runs</span><h2>Six steps, <em>one point of contact</em></h2></div>
@@ -72,8 +92,8 @@ const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced resid
     <div class="wrap">
       <div class="sec__head reveal"><span class="label">On location &amp; campaign</span><h2>Emsworth <em>in the sun</em></h2></div>
     </div>
-    <div class="drift__wall"><DriftWall client:only="react" items={wall} columns={7} tileWidth={250} tileHeight={300} gap={14} radius={3}
-      tilt={14} turn={-12} speed={24} variance={0.4} parallax={0} lift={0} fade={0.12} dim={0.96} overlayColor="#141c30" /></div>
+    <div class="drift__wall"><DriftWall client:only="react" items={wall} columns={10} tileWidth={250} tileHeight={300} gap={14} radius={3}
+      tilt={0} turn={0} speed={24} variance={0.4} parallax={0} lift={0} fade={0.12} dim={0.96} overlayColor="#141c30" /></div>
   </section>
 </Base>
 
@@ -84,11 +104,24 @@ const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced resid
   .drift .sec__head { margin-bottom: 0; }
   .drift__wall { flex: 1; min-height: 0; margin-top: 12px; pointer-events: none; }
   .drift__wall :global(img) { object-position: 50% 20%; }
+  /* Straight on, edge to edge: no side fade, just a soft edge under the heading. */
+  .drift__wall :global(.drift-wall) { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 5%); mask-image: linear-gradient(180deg, transparent 0, #000 5%); }
   /* Safari: only the wall itself is 3D. Giving every tile its own 3D layer (~200 of them) made Safari drop photos. */
   .drift__wall :global(.drift-wall__col), .drift__wall :global(.drift-wall__track), .drift__wall :global(.drift-wall__tile) { transform-style: flat; }
   .drift__wall :global(.drift-wall__inner) { transform: none; }
   .drift__wall :global(.drift-wall__overlay) { opacity: .1; }
   .drift__wall :global(.drift-wall__inner) { background: var(--tint); } /* tiles crop near the top so faces stay in */
+  .pack__grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(30px, 5vw, 80px); align-items: center; }
+  .pack h2 { font-size: clamp(36px, 4vw, 58px); margin: 12px 0 16px; }
+  .pack__list { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 12px; }
+  .pack__list li { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .pack__list b { font: 600 13px var(--fl); letter-spacing: .14em; text-transform: uppercase; color: var(--lab); }
+  .pack__pics { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: min(68svh, 620px); }
+  .pack__pics span { overflow: hidden; }
+  .pack__pics span:first-child { grid-row: span 2; }
+  .pack__pics :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  .pack__pics span:first-child :global(img) { object-position: 40% 50%; }
+  @media (max-width: 860px) { .pack__grid { grid-template-columns: 1fr; } .pack__pics { height: 70vw; } }
   .two { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 6vw, 90px); }
   .two h2 { font-size: clamp(38px, 4.6vw, 64px); margin-top: 12px; }
   .copy p { margin: 0 0 16px; }

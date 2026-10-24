@@ -510,7 +510,6 @@ export const CATEGORIES: { id: string; name: string; one: string; cover: [string
   { id: 'table', name: 'Table linen', one: 'Napkins', cover: ['napkin', 'j8a2557'], focus: '40% 50%' },
   { id: 'glass', name: 'Glass cloths', one: 'Glass cloth', cover: ['napkin', 'j8a2603'], focus: '60% 50%' },
   { id: 'shirt', name: 'Uniform shirts', one: 'Uniform shirt', cover: ['product-sku', 'j8a2295'], focus: '50% 55%' },
-  { id: 'packaging', name: 'Packaging', one: 'Packaging', cover: ['slipper-robe', 'j8a2550-edit'], focus: '50% 50%' },
 ];
 
 

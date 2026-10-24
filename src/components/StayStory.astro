@@ -1,0 +1,319 @@
+---
+// The Stay, told by scroll: the sky and the sunlight move from dawn to night behind the page, a small sun dial tracks the
+// hour, "Every touch matters" opens the day, each hour's photograph or full-screen clip rises up from the bottom,
+// the evening falls dark with stars, and the day ends on "Good night."
+import { Image } from 'astro:assets';
+import { pick } from '../data/shoot';
+import { morning, late, evening, type Moment } from '../data/stay';
+
+const words = (s: string) => s.split(' ');
+const hourOf = (t: string) => { const [h, m] = t.split(':').map(Number); return h + m / 60; };
+// The colour of the sky behind each hour.
+const SKY: Record<string, string> = { '12:00': '#f2efe4', '14:00': '#f1e8d8', '16:00': '#efe0c8', '07:00': '#f4e3cf', '07:30': '#f7ecdd', '09:00': '#f6efe2', '19:30': '#2b2540', '22:00': '#141b30' };
+const scene = (m: Moment, i: number, night = false) => ({ m, i, night, src: pick(m.img[0], m.img[1]) });
+const scenes = [...morning.map((m, i) => scene(m, i)), ...late.map((m, i) => scene(m, morning.length + i)),
+  ...evening.map((m, i) => scene(m, morning.length + late.length + i, true))];
+---
+<div class="story" data-story>
+  <!-- Sunlight: a soft glow that crosses the screen with the hour (low and peach at dawn, high and white at noon, low and
+       orange at dusk, a cool moon at night). -->
+  <div class="glow" aria-hidden="true" data-glow></div>
+  <!-- The hour, always to hand: a sun on an arc, and the time. -->
+  <aside class="dial" aria-hidden="true" data-dial>
+    <svg viewBox="0 0 120 70"><path d="M8 62 A52 52 0 0 1 112 62" class="dial__arc" /><path d="M8 62 A52 52 0 0 1 112 62" class="dial__done" data-dial-done pathLength="1" /><circle r="6" class="dial__sun" data-dial-sun cx="8" cy="62" /></svg>
+    <b data-dial-time>06:30</b>
+  </aside>
+
+  <!-- Opening: one line, lit word by word as you scroll. -->
+  <section class="open" data-open data-sky="#efdccc" data-time="06:30" data-hour="6">
+    <div class="open__copy">
+      <span class="label">Sixteen hours at your hotel</span>
+      <p class="open__line" data-open-line>{words('Every touch').map((w) => <span>{w} </span>)}<em>{words('matters.').map((w) => <span>{w} </span>)}</em></p>
+      <p class="open__sub" data-open-sub>From the first towel of the morning to the last sheet turned down at night, a guest remembers how a stay felt.</p>
+      <p class="open__hint">Scroll to start the day</p>
+    </div>
+  </section>
+
+  <!-- Morning and evening: one scene a screen, pinned while it plays. -->
+  {scenes.map(({ m, i, night, src }, k) => (
+    <>
+      {k === morning.length + late.length && <div class="dusk" aria-hidden="true" data-dusk data-sky="#c88d6c" data-time="18:30" data-hour="18.5">
+        <video class="dusk__vid" src="/video/c7132.mp4" poster="/video/c7132.jpg" muted loop playsinline preload="none" data-vid data-dusk-vid></video><p>{words('The light goes gold.').map((w) => <span>{w} </span>)}</p></div>}
+      <section class:list={['ch', `ch--${m.reveal}`, { 'ch--flip': !m.video && i % 2 === 1, 'ch--night': night, 'ch--full': !!m.video, 'ch--right': m.side === 'right', 'ch--narrow': !!m.narrow }]} data-ch data-time={m.t} data-sky={SKY[m.t]} data-hour={hourOf(m.t)}>
+        <div class="ch__ghost" aria-hidden="true" data-ghost>{m.t}</div>
+        {night && <div class="stars" aria-hidden="true" data-stars></div>}
+        <div class="ch__in">
+          <figure class="ch__pic" data-pic>
+            {m.video
+              ? <video poster={`/video/${m.video}-hd.jpg`} muted loop playsinline preload="none" aria-label={`${m.part}: ${m.h.join(' ')}`} style={`object-position: ${m.focus}; transform-origin: ${m.origin ?? '50% 50%'}`} data-zoom={m.zoom ?? 1} data-pic-img data-vid>
+                  <source src={`/video/${m.video}.mp4`} type="video/mp4" media="(max-width: 860px)" />
+                  <source src={`/video/${m.video}-hd.mp4`} type="video/mp4" />
+                </video>
+              : <Image src={src} alt={`${m.part}: ${m.h.join(' ')}`} widths={[700, 1100, 1600]} sizes="(max-width: 860px) 92vw, 54vw" loading="lazy" style={`object-position: ${m.focus}`} data-pic-img />}
+          </figure>
+          {m.video && <div class="ch__shade" aria-hidden="true"></div>}
+          <div class="ch__copy">
+            <p class="ch__time" data-bit><b>{m.t}</b><span>{m.part}</span></p>
+            <h2 data-no-split>{words(m.h[0]).map((w) => <span class="w"><span data-word>{w}</span></span>)} <em>{words(m.h[1]).map((w) => <span class="w"><span data-word>{w}</span></span>)}</em></h2>
+            <p class="ch__p" data-bit>{m.p}</p>
+            <ul class="ch__items" data-bit>{m.items.map(([n, h]) => <li><a href={h}>{n} <span aria-hidden="true">→</span></a></li>)}</ul>
+          </div>
+        </div>
+      </section>
+    </>
+  ))}
+
+  <!-- The end of the day. -->
+  <section class="night" data-night data-sky="#0b1122" data-time="23:00" data-hour="23">
+    <div class="stars stars--all" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true" data-moon></div>
+    <p class="night__word" data-night-word>{'Good night.'.split('').map((c) => <span>{c === ' ' ? ' ' : c}</span>)}</p>
+    <p class="night__sub" data-night-sub>And tomorrow, it all comes back fresh from the laundry.</p>
+  </section>
+</div>
+
+<style>
+  .story { --sky: #f3e6d8; --ink-s: var(--ink); --gx: 12%; --gy: 85%; --glow: rgba(255, 190, 140, .45); position: relative; background: var(--sky); color: var(--ink-s); overflow-x: clip; }
+  .glow { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .6s;
+    background: radial-gradient(75vmax 60vmax at var(--gx) var(--gy), var(--glow), transparent 62%); }
+  .glow.on { opacity: 1; }
+  .story > section, .story > .dusk { position: relative; z-index: 1; }
+
+  /* Sun dial */
+  .dial { position: fixed; z-index: 30; right: clamp(16px, 2.4vw, 34px); bottom: clamp(18px, 4vh, 40px); display: grid; justify-items: center; gap: 2px;
+    padding: 10px 12px 8px; border-radius: 14px; background: color-mix(in srgb, var(--ground) 72%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px -14px rgba(0,0,0,.4); opacity: 0; translate: 0 12px; transition: opacity .5s, translate .5s; pointer-events: none; }
+  .dial.on { opacity: 1; translate: 0 0; }
+  .dial svg { width: 92px; height: 54px; overflow: visible; }
+  .dial__arc { fill: none; stroke: color-mix(in srgb, var(--ink) 18%, transparent); stroke-width: 2; stroke-dasharray: 2 5; }
+  .dial__done { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .dial__sun { fill: var(--accent); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 70%, transparent)); }
+  .dial b { font: 700 15px var(--fb); letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+  /* Opening: one line, lit word by word */
+  .open { position: relative; height: 100svh; display: grid; place-items: center; padding: 120px var(--gutter) 40px; overflow: hidden; } /* clear of the menu */
+  .open__copy { position: relative; text-align: center; display: grid; gap: 18px; justify-items: center; max-width: 30ch; }
+  .open__line { margin: 0; font: 500 clamp(56px, 7.4vw, 124px)/.95 var(--fd); letter-spacing: -.01em; color: var(--primary); }
+  .open__line span { display: inline-block; opacity: .12; margin-right: .2em; }
+  .open__line em { font-style: italic; color: var(--accent); }
+  .open__sub { margin: 0; max-width: 34ch; font-size: clamp(19px, 1.6vw, 24px); line-height: 1.45; color: color-mix(in srgb, var(--ink) 75%, transparent); opacity: 0; }
+  .open__hint { margin: 0; font: 600 12px var(--fb); letter-spacing: .2em; text-transform: uppercase; color: var(--lab); }
+
+  /* Scenes */
+  .ch { position: relative; height: 100svh; min-height: 600px; overflow: hidden; display: grid; align-items: center; }
+  .ch__ghost { position: absolute; left: 0; top: 50%; translate: 0 -50%; white-space: nowrap; pointer-events: none; font: 800 clamp(160px, 30vw, 460px)/1 var(--fb); letter-spacing: -.04em;
+    color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ink-s) 14%, transparent); }
+  .ch__in { position: relative; display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(30px, 5vw, 90px); align-items: center;
+    width: 100%; max-width: var(--max); margin: 0 auto; padding: 84px var(--gutter) 0; }
+  .ch--flip .ch__in { grid-template-columns: .85fr 1.15fr; }
+  .ch--flip .ch__pic { order: 2; }
+  .ch__pic { margin: 0; height: min(70svh, 680px); overflow: hidden; border-radius: 3px; background: color-mix(in srgb, var(--ink-s) 8%, transparent); }
+  .ch__pic img, .ch__pic video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .ch__copy { display: grid; gap: 16px; justify-items: start; }
+  .ch__time { display: flex; align-items: baseline; gap: 16px; margin: 0; }
+  .ch__time b { font: var(--fdw) clamp(56px, 6.6vw, 110px)/1 var(--fd); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--primary); }
+  .ch__time span { font: 600 12px var(--fb); letter-spacing: .2em; text-transform: uppercase; color: var(--lab); }
+  .ch h2 { margin: 0; font-size: clamp(34px, 3.6vw, 58px); line-height: 1.04; }
+  .ch h2 .w { display: inline-block; margin-right: .24em; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
+  .ch h2 .w > span { display: inline-block; }
+  .ch__p { margin: 0; max-width: 42ch; font-size: clamp(16px, 1.25vw, 19px); color: color-mix(in srgb, var(--ink-s) 72%, transparent); }
+  .ch__items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ch__items a { display: inline-flex; gap: 8px; padding: 9px 17px; border-radius: 999px; text-decoration: none; font-size: 14.5px; color: var(--ink-s);
+    border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent); transition: background .3s, color .3s; }
+  .ch__items a:hover { background: var(--accent); color: #fff; }
+
+  /* Full-screen clips: the video fills the screen, the words sit on a soft shade on the side away from the person. */
+  .ch--full { --ink-s: #fbf6ee; }
+  .ch--full .ch__in { display: block; max-width: none; padding: 0; position: static; }
+  .ch--full .ch__pic { position: absolute; inset: 0; height: auto; border-radius: 0; z-index: 0; }
+  /* A soft shade at the top so the see-through menu reads over bright clips. */
+  .ch--full .ch__pic::after { content: ''; position: absolute; inset: 0 0 auto; height: 160px; background: linear-gradient(180deg, rgba(15, 12, 10, .4), transparent); pointer-events: none; }
+  .ch--full .ch__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(20, 14, 10, .62) 0%, rgba(20, 14, 10, .35) 34%, transparent 60%); }
+  .ch--full.ch--right .ch__shade { background: linear-gradient(270deg, rgba(20, 14, 10, .62) 0%, rgba(20, 14, 10, .35) 34%, transparent 60%); }
+  .ch--full .ch__copy { position: absolute; z-index: 2; top: 50%; translate: 0 -46%; width: min(520px, 40vw);
+    left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
+  .ch--full.ch--right .ch__copy { left: auto; width: min(430px, 30vw); right: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
+  .ch--full .ch__copy { top: 52%; }
+  .ch--full.ch--narrow .ch__copy { width: min(300px, 21vw); gap: 12px; }
+  .ch--full.ch--narrow .ch__time b { font-size: clamp(48px, 5vw, 84px); }
+  .ch--full.ch--narrow h2 { font-size: clamp(28px, 2.6vw, 42px); }
+  .ch--full.ch--narrow .ch__p { font-size: 15.5px; }
+  .ch--full .ch__time b, .ch--full h2 { color: #fffaf2; text-shadow: 0 2px 30px rgba(0, 0, 0, .3); }
+  .ch--full .ch__time span { color: color-mix(in srgb, var(--accent) 70%, #fff); }
+  .ch--full .ch__p { color: rgba(255, 250, 242, .88); }
+  .ch--full .ch__ghost { display: none; }
+
+  /* Night scenes: light words on the dark sky, stars behind. */
+  .ch--night { --ink-s: #f3ece0; }
+  .ch--night .ch__time b, .ch--night h2 { color: #f6efe4; }
+  .ch--night .ch__time span { color: color-mix(in srgb, var(--accent) 80%, #fff); }
+  .stars { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background-image: radial-gradient(1.4px 1.4px at 12% 18%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 28% 72%, #fff 50%, transparent 52%),
+      radial-gradient(1.2px 1.2px at 46% 12%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 63% 38%, #fff 50%, transparent 52%),
+      radial-gradient(1.6px 1.6px at 81% 22%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 92% 64%, #fff 50%, transparent 52%),
+      radial-gradient(1.2px 1.2px at 7% 86%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 55% 90%, #fff 50%, transparent 52%),
+      radial-gradient(1.3px 1.3px at 37% 44%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 74% 82%, #fff 50%, transparent 52%);
+    background-size: 520px 420px; animation: twinkle 6s ease-in-out infinite alternate; }
+  @keyframes twinkle { from { filter: brightness(.6); } to { filter: brightness(1.3); } }
+
+  /* Between afternoon and evening, one line. */
+  .dusk { position: relative; height: 100svh; display: grid; place-items: center; padding: 0 var(--gutter); overflow: hidden; }
+  .dusk__vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  .dusk::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--sky), rgba(120, 60, 30, .25) 30%, rgba(120, 60, 30, .25) 70%, var(--sky)); pointer-events: none; }
+  .dusk p { position: relative; z-index: 1; text-shadow: 0 4px 40px rgba(60, 25, 10, .45); }
+  .dusk p { margin: 0; font: italic 500 clamp(48px, 7vw, 116px)/1 'Cormorant Garamond', Georgia, serif; color: #fff4e2; text-align: center; }
+  .dusk span { display: inline-block; opacity: 0; translate: 0 30px; margin-right: .24em; }
+
+  /* Good night */
+  .night { position: relative; height: 130svh; display: grid; place-items: center; align-content: center; gap: 22px; overflow: hidden; color: #f3ece0; text-align: center; padding: 0 var(--gutter); }
+  .stars--all { opacity: .9; }
+  .moon { position: absolute; left: 50%; top: 18%; width: clamp(80px, 9vw, 140px); aspect-ratio: 1; margin-left: calc(clamp(80px, 9vw, 140px) / -2); border-radius: 50%;
+    background: radial-gradient(circle at 36% 36%, #fffaf0, #efe2c6 60%, #d9c7a2); box-shadow: 0 0 80px 20px rgba(255, 240, 210, .18); }
+  .night__word { position: relative; margin: 0; font: italic 500 clamp(76px, 14vw, 230px)/1 'Cormorant Garamond', Georgia, serif; letter-spacing: -.01em; }
+  .night__word span { display: inline-block; }
+  .night__sub { position: relative; margin: 0; font-size: clamp(16px, 1.3vw, 20px); color: color-mix(in srgb, #f3ece0 70%, transparent); }
+
+  @media (max-width: 860px) {
+    .dial { display: none; }
+
+    .ch { height: auto; min-height: 0; padding: 40px 0; }
+    .ch__in, .ch--flip .ch__in { grid-template-columns: 1fr; padding-top: 0; }
+    .ch--flip .ch__pic { order: 0; }
+    .ch__pic { height: 56svh; }
+    .ch__ghost { font-size: 44vw; top: 30%; }
+    .ch--full { height: 100svh; padding: 0; }
+    .ch--full .ch__pic { height: auto; top: 0; }
+    .ch--full .ch__shade, .ch--full.ch--right .ch__shade { background: linear-gradient(0deg, rgba(20, 14, 10, .75) 0%, rgba(20, 14, 10, .4) 45%, transparent 70%); }
+    .ch--full .ch__copy, .ch--full.ch--right .ch__copy { top: auto; bottom: 36px; translate: none; left: var(--gutter); right: var(--gutter); width: auto; }
+    .night { height: 100svh; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const story = document.querySelector<HTMLElement>('[data-story]');
+  if (story) {
+    const $$ = <T extends Element = HTMLElement>(s: string, c: ParentNode = story) => [...c.querySelectorAll<T>(s)] as T[];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The dial: the sun follows the arc with the page, and shows the hour of whatever is on screen.
+    const dial = story.querySelector<HTMLElement>('[data-dial]')!;
+    const arc = story.querySelector<SVGPathElement>('.dial__arc')!;
+    const sun = story.querySelector<SVGCircleElement>('[data-dial-sun]')!;
+    const done = story.querySelector<SVGPathElement>('[data-dial-done]')!;
+    const timeEl = story.querySelector('[data-dial-time]')!;
+    ScrollTrigger.create({
+      trigger: story, start: 'top 20%', end: 'bottom 80%',
+      onToggle: (st) => dial.classList.toggle('on', st.isActive),
+      onUpdate: (st) => {
+        const pt = arc.getPointAtLength(arc.getTotalLength() * st.progress);
+        sun.setAttribute('cx', String(pt.x)); sun.setAttribute('cy', String(pt.y));
+        done.style.strokeDashoffset = String(1 - st.progress);
+        sun.style.fill = st.progress > .82 ? '#e9e3d4' : '';
+      },
+    });
+    // Each part of the day sets the sky and the hour as it comes on screen.
+    const setHour = (el: HTMLElement) => {
+      if (el.dataset.time) timeEl.textContent = el.dataset.time;
+    };
+    const hourOn = (el: HTMLElement) => ({ onEnter: () => setHour(el), onEnterBack: () => setHour(el) });
+
+    // Sunlight by the hour: where the glow sits and its colour, between these points of the day.
+    const SUN: [number, number, number, string][] = [
+      [6, 10, 88, 'rgba(255,186,140,.55)'], [8, 22, 30, 'rgba(255,232,190,.5)'], [12, 50, -5, 'rgba(255,252,236,.65)'],
+      [16, 78, 18, 'rgba(255,214,150,.5)'], [18.5, 92, 82, 'rgba(255,128,70,.6)'], [20, 80, 30, 'rgba(150,120,200,.25)'], [23, 70, 12, 'rgba(170,190,255,.2)'],
+    ];
+    const sunAt = (h: number) => {
+      const k = Math.max(0, SUN.findIndex((p, i) => i === SUN.length - 1 || SUN[i + 1][0] > h));
+      const a = SUN[k], b = SUN[Math.min(k + 1, SUN.length - 1)];
+      const f = b[0] === a[0] ? 0 : Math.min(1, Math.max(0, (h - a[0]) / (b[0] - a[0])));
+      return { '--gx': `${a[1] + (b[1] - a[1]) * f}%`, '--gy': `${a[2] + (b[2] - a[2]) * f}%`, '--glow': gsap.utils.interpolate(a[3], b[3], f) };
+    };
+    // The sky and the light blend from one part of the day to the next as each part scrolls into view.
+    const blendSky = () => {
+      const parts = $$('[data-sky]');
+      const look = (el: HTMLElement) => ({ '--sky': el.dataset.sky, ...sunAt(Number(el.dataset.hour) || 12) });
+      gsap.set(story, look(parts[0]));
+      parts.slice(1).forEach((el, i) => gsap.fromTo(story, look(parts[i]), { ...look(el), ease: 'none', immediateRender: false,
+        scrollTrigger: { trigger: el, start: 'top 85%', end: 'top 15%', scrub: true } }));
+    };
+    // The menu stays see-through on this page: dark words over the light sky, light words over clips, dusk and night.
+    const hdr = document.querySelector<HTMLElement>('[data-hdr]');
+    const isDark = (el: HTMLElement) => el.matches('.ch--full, .ch--night, [data-dusk], [data-night]');
+    const tone = (el: HTMLElement | null) => hdr?.classList.toggle('hdr--ink', !!el && !isDark(el));
+    const glow = story.querySelector<HTMLElement>('[data-glow]')!;
+    ScrollTrigger.create({ trigger: story, start: 'top bottom', end: 'bottom top', onToggle: (st) => glow.classList.toggle('on', st.isActive) });
+
+    // Resort clips play only while they are on screen, and only for visitors who have not asked for less motion.
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      const v = e.target as HTMLVideoElement;
+      if (e.isIntersecting && !reduce) { v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+    }), { rootMargin: '200px 0px' });
+    $$<HTMLVideoElement>('[data-vid]').forEach((v) => io.observe(v));
+
+    const mm = gsap.matchMedia();
+    mm.add({ big: '(min-width: 861px)', small: '(max-width: 860px)', reduce: '(prefers-reduced-motion: reduce)' }, (ctx) => {
+      const { big, reduce: still } = ctx.conditions as { big: boolean; reduce: boolean };
+      if (still) {
+        gsap.set($$('.open__line span, .open__sub, .dusk span, .stars'), { opacity: 1, translate: 0 });
+        $$('[data-sky]').forEach((el) => ScrollTrigger.create({ trigger: el, start: 'top 60%', end: 'bottom 60%', ...hourOn(el) }));
+        blendSky();
+        return;
+      }
+
+      // Opening: the line lights up word by word, then its note.
+      const open = story.querySelector<HTMLElement>('[data-open]')!;
+      gsap.timeline({ scrollTrigger: { trigger: open, start: 'top top', end: '+=140%', scrub: 0.8, pin: big, ...hourOn(open) } })
+        .to($$('.open__line span', open), { opacity: 1, stagger: 0.12, ease: 'none', duration: 0.25 }, 0.15)
+        .to('[data-open-sub]', { opacity: 1, duration: 0.3 }, 0.6)
+        .to('.open__hint', { opacity: 0, duration: 0.1 }, 0)
+        .to('.open__copy', { y: -40, opacity: 0, duration: 0.25 }, 1.15);
+
+      // Each scene: the photo opens in its own way, the big outline hour drifts behind, the words rise.
+      const scene = (ch: HTMLElement) => {
+        const pic = ch.querySelector<HTMLElement>('[data-pic]')!;
+        const img = ch.querySelector<HTMLElement>('[data-pic-img]')!;
+        const zoom = Number(img.dataset.zoom) || 1;
+        // Every scene opens the same way: the picture rises up from the bottom, like a blind going up.
+        const from = 'inset(100% 0% 0% 0%)';
+        const to = 'inset(0% 0% 0% 0%)';
+        // Pinned for a while on desktop; the opening starts a little before the pin, as the scene slides up.
+        if (big) ScrollTrigger.create({ trigger: ch, start: 'top top', end: '+=130%', pin: true });
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ch, start: big ? 'top 40%' : 'top 80%', end: big ? '+=130%' : 'bottom 60%', scrub: 0.8, ...hourOn(ch) } });
+        tl.fromTo(pic, { clipPath: from }, { clipPath: to, ease: 'power2.inOut', duration: 1 }, 0)
+          .fromTo(img, { scale: 1.3 * zoom }, { scale: zoom, ease: 'power2.out', duration: 1.4 }, 0)
+          .fromTo(ch.querySelector('[data-ghost]'), { xPercent: ch.classList.contains('ch--flip') ? -20 : 10 }, { xPercent: ch.classList.contains('ch--flip') ? 0 : -15, ease: 'none', duration: 2 }, 0)
+          .from($$('[data-word]', ch), { yPercent: 110, rotate: 3, stagger: 0.05, duration: 0.5, ease: 'power3.out' }, 0.35)
+          .from($$('[data-bit]', ch), { y: 30, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' }, 0.45)
+          .from($$('.ch__items li', ch), { scale: 0.8, opacity: 0, stagger: 0.06, duration: 0.3 }, 0.7)
+          .to(pic, { y: ch.classList.contains('ch--full') ? 0 : -40, duration: 1, ease: 'none' }, 1)
+          .to(ch.querySelector('.ch__copy'), { y: -40, duration: 0.6, ease: 'none' }, 1.4);
+        const stars = ch.querySelector('[data-stars]');
+        if (stars) tl.to(stars, { opacity: 0.85, duration: 0.8 }, 0.2);
+      };
+
+      $$('[data-ch]').forEach(scene);
+      blendSky();
+      // Whatever sits under the menu sets its colour (created after the pins, so the positions are right).
+      $$('[data-open], [data-ch], [data-dusk], [data-night]').forEach((el) => ScrollTrigger.create({ trigger: el, start: 'top 42px', end: 'bottom 42px',
+        onEnter: () => tone(el), onEnterBack: () => tone(el) }));
+      ScrollTrigger.create({ trigger: story, start: 'top 42px', end: 'bottom 42px', onLeave: () => tone(null), onLeaveBack: () => tone(null) });
+
+      // Dusk: one line, word by word.
+      const dusk = story.querySelector<HTMLElement>('[data-dusk]')!;
+      gsap.fromTo('[data-dusk-vid]', { opacity: 0, scale: 1.2 }, { opacity: 0.9, scale: 1, ease: 'none', scrollTrigger: { trigger: dusk, start: 'top bottom', end: 'center center', scrub: true } });
+      gsap.to($$('.dusk span'), { opacity: 1, translate: '0 0', stagger: 0.15, ease: 'power2.out', scrollTrigger: { trigger: dusk, start: 'top 70%', end: 'center 45%', scrub: true, ...hourOn(dusk) } });
+
+      // Good night: the moon rises, the letters settle from wide apart, then the line underneath.
+      const night = story.querySelector<HTMLElement>('[data-night]')!;
+      gsap.timeline({ scrollTrigger: { trigger: night, start: 'top 70%', end: 'center center', scrub: 1, ...hourOn(night) } })
+        .fromTo('[data-moon]', { y: 160, opacity: 0 }, { y: 0, opacity: 1, ease: 'power2.out', duration: 1 }, 0)
+        .from($$('[data-night-word] span'), { x: (i, _, all) => (i - all.length / 2) * 40, opacity: 0, filter: 'blur(8px)', stagger: 0.03, ease: 'power3.out', duration: 0.8 }, 0.2)
+        .from('[data-night-sub]', { y: 20, opacity: 0, duration: 0.4 }, 0.8);
+    });
+  }
+</script>

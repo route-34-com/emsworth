@@ -1,9 +1,9 @@
 ---
-// One Designer Collection pattern, from the main-branch site: colourway swatches, views, and add to quote.
-import Base from '../../layouts/Base.astro';
-import Pic from '../../components/Pic.astro';
-import CtaBand from '../../components/CtaBand.astro';
-import { PATTERNS, type Pattern } from '../../data/main';
+// One towel design (jacquard pattern or plain terry) in the Lookbook, from the main-branch site: colourway swatches, views, and add to quote.
+import Base from '../../../layouts/Base.astro';
+import Pic from '../../../components/Pic.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import { PATTERNS, type Pattern } from '../../../data/main';
 
 export function getStaticPaths() {
   return PATTERNS.map((p) => ({ params: { pattern: p.slug }, props: { pat: p } }));
@@ -21,7 +21,7 @@ const views = (c: typeof first) =>
 const data = pat.colourways.map((c) => ({ key: c.key, name: c.name, views: views(c) }));
 const others = PATTERNS.filter((p) => p.slug !== pat.slug);
 ---
-<Base title={`${pat.name} · Designer Collection · Emsworth Hospitality`} description={`${pat.name}: ${pat.intro}`}>
+<Base title={`${pat.name} · Bath & face towels · Lookbook · Emsworth Hospitality`} description={`${pat.name}: ${pat.intro}`}>
   <div class="mb" data-tone="sand">
     <section class="pdp" data-theme-section="sand">
       <div class="pdp__stage">
@@ -38,7 +38,7 @@ const others = PATTERNS.filter((p) => p.slug !== pat.slug);
         </div>
       </div>
       <div class="pdp__info">
-        <nav class="crumbs crumbs--dark" aria-label="Breadcrumb"><a href="/designer/">Designer Collection</a><span>/</span></nav>
+        <nav class="crumbs crumbs--dark" aria-label="Breadcrumb"><a href="/lookbook/">Lookbook</a><span>/</span><a href="/lookbook/bath/#designs">Bath &amp; face towels</a><span>/</span></nav>
         <p class="pdp__kicker">{pat.kicker}</p>
         <h1 class="pdp__title">{pat.name}</h1>
         <p class="pdp__colour">Colourway · <b id="pdpColour">{first.name}</b></p>
@@ -52,7 +52,7 @@ const others = PATTERNS.filter((p) => p.slug !== pat.slug);
         <div class="pdp__ctas">
           <button type="button" class="btn btn--teal" id="pdpCta" data-pattern={pat.name} data-slug={pat.slug}
             data-add={`designer-${pat.slug}-${first.key}`} data-name={`${pat.name} — ${first.name}`} data-group="Designer Collection">+ Add to quote</button>
-          <a href="/designer/#studio" class="btn btn--line"><span>Customise it</span></a>
+          <a href="/request-a-quote/" class="btn btn--line"><span>Customise it</span></a>
         </div>
         <p class="pdp__fine">Sizes, weight, border and branding are specified per project. Colours matched to Pantone on request.</p>
       </div>
@@ -63,7 +63,7 @@ const others = PATTERNS.filter((p) => p.slug !== pat.slug);
       <h2 class="split">More <em>patterns.</em></h2>
       <div class="more__grid">
         {others.map((o) => (
-          <a class="more__card" href={`/designer/${o.slug}/`}>
+          <a class="more__card" href={`/lookbook/bath/${o.slug}/`}>
             <div><Pic src={o.colourways[0].detail ?? o.colourways[0].fold} alt={o.name} sizes="(max-width: 820px) 50vw, 20vw" /></div>
             <h3>{o.name}</h3><span>{o.colourways.length} colourways</span>
           </a>
@@ -71,6 +71,6 @@ const others = PATTERNS.filter((p) => p.slug !== pat.slug);
       </div>
     </section>
 
-    <CtaBand title="Your pattern, <em>your colours.</em>" text="Custom jacquard is woven to your artwork and Pantone references. Send the brief and we’ll sample it." href="/designer/#studio" label="Open the towel studio" />
+    <CtaBand title="Your pattern, <em>your colours.</em>" text="Custom jacquard is woven to your artwork and Pantone references. Send the brief and we’ll sample it." href="/request-a-quote/" label="Send your brief" />
   </div>
 </Base>

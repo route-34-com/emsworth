@@ -1,22 +1,24 @@
 ---
 import '../styles/global.css';
 import '../styles/main-port.css';
+import '../styles/hero-tune.css';
 import logo from '../assets/logo.svg?raw';
 import { collections, ranges } from '../data/catalogue';
 
-interface Props { title: string; description?: string; overHero?: boolean }
+interface Props { title: string; description?: string; overHero?: boolean; clearHeader?: boolean }
 const {
   title,
   description = 'Hotel textiles woven in Tamil Nadu and supplied from Dubai: bath, bed, table, pool and spa linen, robes and slippers, made to your specification.',
   overHero = false,
+  clearHeader = false,
 } = Astro.props;
 const nav = [
-  ['Collections', '/collections/'], ['Designer', '/designer/'], ['Lookbook', '/lookbook/'], ['About', '/about/'],
+  ['Collections', '/collections/'], ['Designer', '/designer/'], ['The Stay', '/the-stay/'], ['Lookbook', '/lookbook/'], ['About', '/about/'],
 ];
 const path = Astro.url.pathname;
 ---
 <!doctype html>
-<html lang="en" data-palette="navybeige" data-type="mulish" data-theme="heritage">
+<html lang="en" data-palette="navybeige" data-theme="split">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,7 +35,9 @@ const path = Astro.url.pathname;
       var d = {};
       try { d = JSON.parse(localStorage.getItem('emsworth-design') || '{}'); } catch (e) {}
       var q = new URLSearchParams(location.search);
-      ['palette', 'type', 'theme'].forEach(function (k) { if (q.get(k)) d[k] = q.get(k); if (d[k]) document.documentElement.dataset[k] = d[k]; });
+      // Only the palette is a choice now (type and theme are fixed); an old saved type or theme is ignored.
+      var p = q.get('palette') || d.palette;
+      if (p === 'teal' || p === 'navybeige') document.documentElement.dataset.palette = p;
     })();
   </script>
 </head>
@@ -41,7 +45,7 @@ const path = Astro.url.pathname;
   <!-- The line mark from the main site, used by the ported call-to-action bands. -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="loop" viewBox="0 0 270 420"><path d="M105,122 C103,100 85,90 70,93 C55,96 45,110 47,130 C48,137 50,142 52,145 C35,140 15,145 11,165 C7,190 30,210 60,213 C95,216 140,198 160,165 C175,140 168,110 148,106 C125,101 108,120 104,150 C100,185 104,230 125,275 C150,330 200,370 262,405" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></symbol></defs></svg>
   <a class="skip" href="#main">Skip to content</a>
-  <header class:list={['hdr', { 'hdr--over': overHero }]} data-hdr>
+  <header class:list={['hdr', { 'hdr--over': overHero, 'hdr--clear': clearHeader }]} data-hdr>
     <div class="hdr__in wrap">
       <a class="hdr__logo" href="/" aria-label="Emsworth Hospitality, home"><Fragment set:html={logo} /></a>
       <nav class="hdr__nav" aria-label="Main">
@@ -72,7 +76,7 @@ const path = Astro.url.pathname;
         <div class="ftr__cols">
           <div><span class="label">Collections</span>{collections.map((c) => <a href={`/collections/${c.slug}/`}>{c.name}</a>)}</div>
           <div><span class="label">Ranges</span>{ranges.map((r) => <a href={`/ranges/${r.slug}/`}>{r.name}</a>)}</div>
-          <div><span class="label">Company</span><a href="/designer/">Designer Collection</a><a href="/designer/#studio">Towel studio</a><a href="/lookbook/">Lookbook</a><a href="/about/">About</a>
+          <div><span class="label">Company</span><a href="/designer/">Designer Collection</a><a href="/the-stay/">The Stay</a><a href="/lookbook/">Lookbook</a><a href="/about/">About</a>
             <a href="mailto:info@emsworthhospitality.com">info@emsworthhospitality.com</a></div>
         </div>
       </div>
@@ -98,15 +102,7 @@ const path = Astro.url.pathname;
     <div class="ds__panel" data-ds-panel hidden>
       <p class="ds__h">Palette</p>
       <div class="ds__row" data-ds-group="palette">
-        <button data-v="teal">Teal &amp; Sand</button><button data-v="navy">Navy &amp; Gold</button><button data-v="claret">Oxford Claret</button><button data-v="navybeige">Navy, Beige &amp; Gold</button>
-      </div>
-      <p class="ds__h">Typeface</p>
-      <div class="ds__row" data-ds-group="type">
-        <button data-v="caslon">Caslon</button><button data-v="bentham">Bentham</button><button data-v="gloock">Gloock</button><button data-v="cormorant">Cormorant</button><button data-v="bodoni">Bodoni</button><button data-v="playfair">Playfair</button><button data-v="mulish">Mulish</button>
-      </div>
-      <p class="ds__h">Theme</p>
-      <div class="ds__row" data-ds-group="theme">
-        <button data-v="heritage">Heritage</button><button data-v="split">Split Screen</button>
+        <button data-v="navybeige">Navy, Beige &amp; Gold</button><button data-v="teal">Teal &amp; Sand</button>
       </div>
     </div>
   </div>
@@ -126,13 +122,19 @@ const path = Astro.url.pathname;
   .hdr { position: sticky; top: 0; z-index: 50; background: var(--primary); color: var(--ground); transition: background .35s, box-shadow .35s; }
   .hdr--over { position: fixed; left: 0; right: 0; background: transparent; }
   .hdr--over.hdr--solid, .hdr.hdr--open { background: var(--primary); box-shadow: 0 10px 30px -20px rgba(0,0,0,.5); }
+  /* clearHeader: the header never turns into a bar; the page can switch its words dark (.hdr--ink) over light backgrounds. */
+  .hdr--clear.hdr--solid { background: transparent; box-shadow: none; }
+  .hdr--clear { transition: color .4s; }
+  .hdr--clear.hdr--ink:not(.hdr--open) { color: var(--primary); }
+  .hdr--clear.hdr--ink:not(.hdr--open) .hdr__logo { color: var(--primary); }
+  .hdr--clear.hdr--ink:not(.hdr--open) .hdr__burger span { background: var(--primary); }
   .hdr__in { display: flex; align-items: center; gap: 28px; height: 84px; }
   .hdr__logo { display: block; color: var(--ground); width: clamp(150px, 15vw, 196px); flex: none; }
   .hdr__logo svg, .ftr__logo svg { display: block; width: 100%; height: auto; }
   .hdr__nav { display: flex; gap: clamp(16px, 2.2vw, 34px); margin-left: auto; }
-  .hdr__nav a, .hdr__panel a { font: var(--flst) var(--flw) 14px var(--fl); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; padding: 6px 0; border-bottom: 1px solid transparent; }
+  .hdr__nav a, .hdr__panel a { font: 700 14px var(--fmenu); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; padding: 6px 0; border-bottom: 1px solid transparent; }
   .hdr__nav a:hover, .hdr__nav a[aria-current='page'] { border-bottom-color: var(--accent); }
-  .hdr__quote { font: 700 11px var(--fb); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; border: 1px solid var(--accent); padding: 10px 14px; display: inline-flex; gap: 8px; align-items: center; }
+  .hdr__quote { font: 700 11px var(--fmenu); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; border: 1px solid var(--accent); padding: 10px 14px; display: inline-flex; gap: 8px; align-items: center; }
   .hdr__quote span { background: var(--accent); color: var(--dark); border-radius: 999px; min-width: 20px; height: 20px; display: inline-grid; place-items: center; font-size: 10px; letter-spacing: 0; }
   .hdr__burger { display: none; width: 44px; height: 44px; background: none; border: 0; padding: 10px; cursor: pointer; }
   .hdr__burger span { display: block; height: 1.5px; background: var(--ground); margin: 6px 0; transition: transform .3s; }

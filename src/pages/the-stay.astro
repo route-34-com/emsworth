@@ -1,0 +1,44 @@
+---
+// The Stay: a guest's day at the hotel, morning to night, and the textiles they touch at every moment.
+import Base from '../layouts/Base.astro';
+import heroes from '../data/heroes.json';
+import PageHero from '../components/PageHero.astro';
+import StayStory from '../components/StayStory.astro';
+import CtaBand from '../components/CtaBand.astro';
+import stayHero from '../assets/hero/stay-reading.jpg';
+---
+<Base title="The Stay · Emsworth Hospitality" overHero clearHeader
+  description="A guest's day at your hotel, from the team's uniforms at dawn to turndown at night, and the Emsworth textiles behind every moment.">
+  <PageHero tune={(heroes as any).stay} image={stayHero} alt="Guest in a white Emsworth robe and head towel, reading on a lounge in a warm hotel room"
+    focus="50% 15%" plain class="stay-hero" kicker="The Stay" title="One day,<br/><em>every textile.</em>"
+    intro="Follow a guest from dawn to turndown."
+    crumbs={[["Home", "/"]]} />
+
+  <StayStory />
+
+  <div class="mb">
+    <CtaBand title="Dress the whole <em>stay.</em>" text="Tell us your rooms, outlets and occupancy, and we will put together one specification for the day, from uniforms to turndown." href="/request-a-quote/" label="Request a quote" />
+  </div>
+</Base>
+
+<script>
+  // The hero eases away as the day begins: the photo drifts closer, the words lift and fade.
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const hero = document.querySelector('[data-hero]');
+    const st = { trigger: hero, start: 'top top', end: 'bottom top', scrub: true };
+    gsap.to('[data-hero] [data-tune-img]', { scale: 1.12, yPercent: 6, ease: 'none', scrollTrigger: st });
+    gsap.to('[data-hero] [data-tune-text]', { y: -80, opacity: 0, ease: 'none', scrollTrigger: { ...st, end: '60% top' } });
+  }
+</script>
+
+<style is:global>
+  /* The guest sits just left of centre with a book held out, so the words sit high on the wall, above the book. */
+  @media (min-width: 821px) {
+    .stay-hero .ph__panel { align-items: flex-start !important; padding-top: clamp(110px, 15vh, 150px) !important; }
+    .stay-hero .ph__in { max-width: 300px !important; gap: 10px; }
+    .stay-hero h1 { font-size: clamp(40px, 3.8vw, 60px) !important; }
+  }
+</style>

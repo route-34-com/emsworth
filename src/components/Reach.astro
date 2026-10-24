@@ -1,16 +1,36 @@
 ---
 ---
-<section class="reach" id="reach" data-theme-section="teal">
+<section class="reach reach--world" id="reach" data-theme-section="teal">
   <div class="reach__copy">
-    <h2 class="split">Woven in Tamil Nadu. <em>Run from Dubai.</em></h2>
-    <p>Christy shipments already land at Jebel Ali. Emsworth gives you the regional interface — one point of contact for procurement, approvals and deliveries across the GCC, Middle East and Africa.</p>
-    <ul class="reach__list">
-      <li><b>Hotels &amp; resorts</b> New-build, renovation and replacement programmes</li>
-      <li><b>Developers &amp; consultants</b> Project managers and procurement teams</li>
-      <li><b>Serviced residences</b> Linen, amenities and operating supplies</li>
-      <li><b>Restaurants &amp; F&amp;B</b> Table linen and back-of-house textiles</li>
-      <li><b>Pool &amp; leisure</b> Pool towels, beach products, outdoor textiles</li>
-    </ul>
+    <h2 class="split">Woven in Tamil Nadu. <em>Delivered across the world.</em></h2>
+    <p>Christy shipments already land at Jebel Ali. From there Emsworth delivers to hotels across the world, from New York to Sydney, with one point of contact for procurement, approvals and deliveries.</p>
   </div>
   <div class="reach__map"><canvas id="mapCanvas"></canvas><div class="reach__labels" id="mapLabels"></div></div>
+  <ul class="reach__list">
+    <li><b>Hotels &amp; resorts</b> New-build, renovation and replacement programmes</li>
+    <li><b>Developers &amp; consultants</b> Project managers and procurement teams</li>
+    <li><b>Serviced residences</b> Linen, amenities and operating supplies</li>
+    <li><b>Restaurants &amp; F&amp;B</b> Table linen and back-of-house textiles</li>
+    <li><b>Pool &amp; leisure</b> Pool towels, beach products, outdoor textiles</li>
+  </ul>
 </section>
+
+<style is:global>
+  /* Words, world map and who we serve all fit in one screen below the header. */
+  .mb .reach.reach--world { display: flex; flex-direction: column; align-items: stretch; gap: clamp(14px, 2.4vh, 28px); height: calc(100svh - 84px); min-height: 620px;
+    padding: clamp(26px, 4vh, 48px) var(--gutter) clamp(22px, 3.5vh, 40px); }
+  .mb .reach--world .reach__copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46ch); gap: clamp(24px, 4vw, 70px); align-items: end; }
+  .mb .reach--world h2 { font-size: clamp(2.2rem, 4.2vw, 4.4rem); }
+  .mb .reach--world .reach__copy > p { margin: 0; }
+  .mb .reach--world .reach__map { flex: 1; min-height: 0; aspect-ratio: auto; border-radius: 20px; }
+  .mb .reach--world .reach__list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 22px; margin: 0; padding: 0; border-top: 0; }
+  .mb .reach--world .reach__list li { display: block; padding: 12px 0 0; border-bottom: 0; border-top: 1px solid var(--line); font-size: .8rem; line-height: 1.45; }
+  .mb .reach--world .reach__list b { display: block; margin-bottom: 3px; font-size: .88rem; }
+  @media (max-width: 900px) {
+    .mb .reach.reach--world { height: auto; min-height: 0; }
+    .mb .reach--world .reach__copy { grid-template-columns: 1fr; gap: 16px; }
+    .mb .reach--world .reach__map { flex: none; aspect-ratio: 1.7; }
+    .mb .reach--world .reach__list { grid-template-columns: 1fr; gap: 0; }
+    .mb .reach--world .reach__list li { padding: 10px 0; }
+  }
+</style>
