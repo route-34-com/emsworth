@@ -1,0 +1,64 @@
+---
+const seals = [
+  { b: 'ISO<br>9001', ring: 'Quality management system · Quality management · ' },
+  { b: 'GOTS', ring: 'Global Organic Textile Standard · Organic · ' },
+  { b: 'OEKO<br>TEX', ring: 'Tested for harmful substances · Standard 100 · ' },
+  { b: 'SA<br>8000', ring: 'Social accountability · Audited workplace · ' },
+];
+const tests = ['Intertek · SGS', 'AATCC 79 absorbency', 'ISO 105 colour fastness', 'ISO 6330 dimensional stability', 'ISO 13934 / 13937 tensile & tear', 'AQL 2.5 / 4.0 inspection', 'BS 7175 · NFPA 701 on request'];
+---
+<section class="creds2" data-seals>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="sealCirc" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs></svg>
+  <div class="creds2__head">
+    <h2>Certified, audited and tested — <em>before you ask.</em></h2>
+  </div>
+  <div class="seals2">
+    {seals.map((s) => (
+      <div class="seal2">
+        <svg viewBox="0 0 200 200" aria-hidden="true"><text><textPath href="#sealCirc" textLength="486" lengthAdjust="spacing">{s.ring}</textPath></text></svg>
+        <b set:html={s.b} />
+      </div>
+    ))}
+  </div>
+  <div class="tests2" aria-label="Testing standards">
+    <div class="tests2__track">
+      {[...tests, ...tests].map((t) => <span>{t}</span>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .creds2 { padding: clamp(80px, 12vh, 160px) 0; background: #FFEDE0; color: #0C3C3A; }
+  .creds2__head { padding: 0 var(--gutter); max-width: 1200px; }
+  .creds2 h2 { font-family: 'Mulish', system-ui, sans-serif; font-weight: 800; font-size: clamp(2.4rem, 6.2vw, 6rem); line-height: .98; letter-spacing: -.035em; margin: 0; color: #0C3C3A; }
+  .creds2 h2 em { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -.01em; }
+  .seals2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 40px); padding: clamp(50px, 8vh, 90px) var(--gutter); }
+  .seal2 { position: relative; aspect-ratio: 1; width: 100%; max-width: 300px; justify-self: center; display: grid; place-items: center; border-radius: 50%; background: #0C3C3A; color: #FFEDE0;
+    transform: scale(.4) rotate(-120deg); opacity: 0; transition: transform 1.6s cubic-bezier(.34, 1.56, .64, 1), opacity .8s ease; }
+  .creds2.in .seal2 { transform: none; opacity: 1; }
+  .creds2.in .seal2:nth-child(2) { transition-delay: .12s; }
+  .creds2.in .seal2:nth-child(3) { transition-delay: .24s; }
+  .creds2.in .seal2:nth-child(4) { transition-delay: .36s; }
+  .seal2 svg { position: absolute; inset: 6%; width: 88%; height: 88%; animation: sealspin 26s linear infinite; }
+  .seal2:nth-child(even) svg { animation-direction: reverse; }
+  .seal2 text { font-size: 12px; letter-spacing: 0; text-transform: uppercase; fill: #EFCDB2; font-weight: 700; font-family: 'Mulish', system-ui, sans-serif; }
+  .seal2 b { position: relative; font-family: 'Mulish', system-ui, sans-serif; font-size: clamp(1.3rem, 2.8vw, 2.6rem); font-weight: 900; text-align: center; line-height: .95; letter-spacing: -.03em; transition: transform .8s cubic-bezier(.22, 1, .36, 1); }
+  .seal2:hover b { transform: scale(1.12) rotate(-6deg); }
+  .seal2::after { content: ''; position: absolute; inset: 22%; border-radius: 50%; border: 1px dashed rgba(255, 237, 224, .3); }
+  @keyframes sealspin { to { transform: rotate(360deg); } }
+  .tests2 { overflow: hidden; border-block: 1px solid rgba(12, 60, 58, .16); padding: 20px 0; }
+  .tests2__track { display: flex; width: max-content; animation: tests2marq 40s linear infinite; }
+  .tests2 span { padding: 0 34px; font-family: 'Mulish', system-ui, sans-serif; font-weight: 700; font-size: 1.05rem; white-space: nowrap; position: relative; }
+  .tests2 span::after { content: ''; position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: #C6A57A; transform: translateY(-50%); }
+  @keyframes tests2marq { to { transform: translateX(-50%); } }
+  @media (max-width: 700px) { .seals2 { grid-template-columns: 1fr 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .seal2 { transform: none; opacity: 1; transition: none; } .seal2 svg, .tests2__track { animation: none; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-seals]').forEach((el) => {
+    new IntersectionObserver((entries, io) => {
+      if (entries[0].isIntersecting) { el.classList.add('in'); io.disconnect(); }
+    }, { threshold: 0.25 }).observe(el);
+  });
+</script>

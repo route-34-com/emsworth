@@ -23,7 +23,7 @@ if (items.reduce((n, c) => n + c.n, 0) !== tagged.filter((p) => p.cat !== 'packa
           <span class="card__img" style={`aspect-ratio: ${c.img.width} / ${c.img.height}`}>
             <Image src={c.img} alt="" widths={[480, 800, 1400]} sizes="(max-width: 640px) 60vw, 40vw" loading={i < 4 ? 'eager' : 'lazy'} />
           </span>
-          <span class="card__cap"><b>{c.name}</b><small>View</small></span>
+          <span class="card__cap"><b>{c.name}</b><span class="link link--icon">Discover</span></span>
         </a>
       ))}
     </div>

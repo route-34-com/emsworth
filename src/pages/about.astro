@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
+import Seals from '../components/Seals.astro';
 import { getImage } from 'astro:assets';
 import DriftWall from '../components/reactbits/DriftWall.jsx';
 import { certifications, process } from '../data/catalogue';
@@ -51,13 +52,7 @@ const markets = ['Hotels & resorts', 'Hospitality developments', 'Serviced resid
     </div>
   </section>
 
-  <section class="sec sec--dark on-dark">
-    <div class="wrap">
-      <div class="sec__head reveal"><span class="label">Certified, audited, tested</span><h2>Before you ask <em>for them.</em></h2></div>
-      <ul class="certs">{certifications.map(([n, d]) => <li class="reveal"><b>{n}</b><span>{d}</span></li>)}</ul>
-      <p class="tests reveal">Testing by Intertek and SGS: absorbency (AATCC 79), colour fastness (ISO 105), dimensional stability after five washes (ISO 6330), tensile and tear (ISO 13934 / 13937). Fire retardancy (BS 7175, NFPA 701) on request.</p>
-    </div>
-  </section>
+  <Seals />
 
   <!-- How we pack -->
   <section class="sec sec--ground pack" id="pack">

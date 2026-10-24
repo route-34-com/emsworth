@@ -41,10 +41,9 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
       <div class="cols" data-rows>
         {[...collections.map((c) => ({ title: c.name, kicker: c.kicker, image: c.image, href: `/collections/${c.slug}/` })), tailor].map((c, i) => (
           <a class="col reveal" href={c.href} style={`--d:${i * 60}ms`} data-ar={(c.image.width / c.image.height).toFixed(4)}>
-            <div class="col__img inset" style={`aspect-ratio: ${c.image.width} / ${c.image.height}`}><Image src={c.image} alt="" widths={[420, 720, 1100]} sizes="(max-width: 700px) 92vw, 45vw" /></div>
+            <div class="col__img" style={`aspect-ratio: ${c.image.width} / ${c.image.height}`}><Image src={c.image} alt="" widths={[420, 720, 1100]} sizes="(max-width: 700px) 92vw, 45vw" /></div>
             <span class="label">{c.kicker}</span>
-            <h3>{c.title}</h3>
-            <span class="link">Explore</span>
+            <span class="col__row"><h3>{c.title}</h3><span class="link link--icon">Discover the collection</span></span>
           </a>
         ))}
       </div>
@@ -85,11 +84,14 @@ const tailor = { title: 'Tailor-made', kicker: 'Your crest, woven in', image: pi
   }
   .cols { display: flex; flex-wrap: wrap; gap: clamp(30px, 3vw, 44px) clamp(18px, 2.4vw, 34px); }
   .col { display: grid; gap: 8px; justify-items: start; align-content: start; width: calc(33.333% - 23px); text-decoration: none; transition-delay: var(--d); }
-  .col__img { width: 100%; overflow: hidden; margin-bottom: 10px; }
+  /* Soft rounded (from Sharan's main-branch update): rounded photo, soft shadow that deepens and lifts on hover. */
+  .col__img { width: 100%; overflow: hidden; margin-bottom: 10px; border-radius: 18px; box-shadow: 0 14px 30px -22px rgba(7, 40, 38, .5); transition: transform .6s cubic-bezier(.22, 1, .36, 1), box-shadow .6s; }
+  .col:hover .col__img { transform: translateY(-4px); box-shadow: 0 30px 50px -26px rgba(7, 40, 38, .55); }
+  .col__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; }
+  .col__row h3 { margin: 0; }
   .col__img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
   .col:hover .col__img img { transform: scale(1.04); }
   .col h3 { font-size: clamp(28px, 2.6vw, 38px); }
-  .col .link { margin-top: 6px; }
 </style>
 
 <script>

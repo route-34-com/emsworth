@@ -4,5 +4,12 @@ dist
 _work
 .DS_Store
 
+<<<<<<< HEAD
 # Local-only tool (drag/zoom hero placement); not part of the published site.
 public/hero-editor
+=======
+# Client source material, local tooling
+source-material/
+.vercel/
+.playwright-mcp/
+>>>>>>> origin/main
