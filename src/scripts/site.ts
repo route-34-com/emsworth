@@ -11,12 +11,18 @@ addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 const burger = $<HTMLButtonElement>('[data-burger]')!;
 const panel = $<HTMLElement>('[data-panel]')!;
-burger.addEventListener('click', () => {
-  const open = panel.hidden;
-  panel.hidden = !open;
+const setMenu = (open: boolean) => {
+  panel.classList.toggle('is-open', open);
   hdr.classList.toggle('hdr--open', open);
   burger.setAttribute('aria-expanded', String(open));
-});
+  panel.setAttribute('aria-hidden', String(!open));
+  panel.toggleAttribute('inert', !open);
+  document.documentElement.style.overflow = open ? 'hidden' : '';
+};
+burger.addEventListener('click', () => setMenu(!panel.classList.contains('is-open')));
+panel.addEventListener('click', (e) => { if ((e.target as Element).closest('a')) setMenu(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('is-open')) setMenu(false); });
+addEventListener('pageshow', () => setMenu(false));
 
 // Reveal
 const io = new IntersectionObserver((es) => es.forEach((e) => {

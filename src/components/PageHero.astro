@@ -79,9 +79,9 @@ const wholeCls = whole ? (ar >= 1 ? 'ph--whole ph--land' : 'ph--whole ph--port')
   :global(html) .ph--port .ph__img.inset::after, :global(html) .ph--land .ph__img.inset::after { display: none; }
   @media (max-width: 820px) {
     :global(html) .ph--port { grid-template-columns: 1fr; height: auto; }
-    :global(html) .ph--port .ph__img { grid-row: 1; aspect-ratio: var(--ar); max-height: 80svh; }
+    :global(html) .ph--port .ph__img { grid-column: 1; grid-row: 1; width: 100%; aspect-ratio: var(--ar); max-height: 80svh; }
     :global(html) .ph--port .ph__img img { object-position: 50% 10%; }
-    :global(html) .ph--port .ph__panel { grid-row: 2; padding: 32px var(--gutter) 40px; }
+    :global(html) .ph--port .ph__panel { grid-column: 1; grid-row: 2; padding: 32px var(--gutter) 40px; }
     :global(html) .ph--land { height: auto; }
     :global(html) .ph--land .ph__img { position: relative; aspect-ratio: var(--ar); grid-row: 1; }
     :global(html) .ph--land .ph__panel { grid-row: 2; padding: 28px var(--gutter) 40px; background: var(--dark); }

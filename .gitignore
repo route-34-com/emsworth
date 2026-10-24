@@ -3,3 +3,8 @@ dist
 .astro
 _work
 .DS_Store
+
+# Client source material, local tooling
+source-material/
+.vercel/
+.playwright-mcp/
